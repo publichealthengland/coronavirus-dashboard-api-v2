@@ -1,0 +1,3 @@
+GET http://localhost:7071/api/v2/data?areaType=nation&metric=newCasesByPublishDate&metric=femaleCases&metric=maleCases&release=2020-11-20T16:53:34.0092775Z&format=csv
+Accept: application/json, text/csv, application/jsonl, application/xml
+Accept-Encoding: gzip, deflate

@@ -1,0 +1,27 @@
+{
+    "bindings": [{
+            "authLevel": "anonymous",
+            "type": "httpTrigger",
+            "direction": "in",
+            "name": "req",
+            "methods": [
+                "get",
+                "head"
+            ],
+            "route": "v2/data"
+        },
+        {
+            "type": "blob",
+            "direction": "in",
+            "name": "apiMetrics",
+            "path": "publicdata/assets/dispatch/api_variables.json",
+            "connection": "DeploymentBlobStorage"
+        },
+        {
+            "type": "http",
+            "direction": "out",
+            "name": "$return"
+        }
+    ],
+    "scriptFile": "../dist/data/index.js"
+}
