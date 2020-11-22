@@ -10,7 +10,6 @@ import type { GenericDBResponse, DBObject, DBResponseItem } from "../../types";
  *      {key1: "value", key2: [{a: 1}, {b: 2}]}
  * 
  * @param doc { DBResponseItem }
- * @returns { any[] }
  */
 const flatten = ( doc: DBResponseItem ): any[] => {
 
@@ -72,7 +71,7 @@ const flatten = ( doc: DBResponseItem ): any[] => {
 
 
 
-function toCsv(docs: GenericDBResponse, nestedMetrics: string[]) {
+const toCsv = (docs: GenericDBResponse, nestedMetrics: string[]) => {
 
     const flattenedDocs = 
         nestedMetrics.length > 0
