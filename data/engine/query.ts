@@ -13,7 +13,6 @@ const despatchQuery = async (queryParams: QueryParamsType, releasedMetrics: Gene
     const format        = queryParams.format;
     const areaCode      = queryParams?.areaCode ?? "";
     const areaType      = queryParams.areaType;
-    const release       = queryParams.release;
     const releaseDate   = queryParams.release.split(/T/)[0];
     const rawMetrics    = queryParams.metric.split(/,/).filter(metric => metric in releasedMetrics);
     const nestedMetrics = rawMetrics.filter(metric => releasedMetrics[metric] === "list");
@@ -21,16 +20,12 @@ const despatchQuery = async (queryParams: QueryParamsType, releasedMetrics: Gene
     // DB Query params
     const parameters = [
         {
-            name: "@releaseTimestamp", 
-            value: release
-        },
-        {
             name: "@areaType", 
             value: areaType
         }
     ];
 
-    let queryFilters = "c.releaseTimestamp = @releaseTimestamp AND c.areaType = @areaType";
+    let queryFilters = "c.areaType = @areaType";
 
     if ( areaCode ) {
         queryFilters += " AND c.areaCode = @areaCode";
