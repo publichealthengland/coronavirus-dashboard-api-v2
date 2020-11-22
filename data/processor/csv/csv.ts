@@ -105,10 +105,10 @@ function toCsv(docs: GenericDBResponse, nestedMetrics: string[]) {
                 case "string":
                     row.push(
                         value 
-                        ? /([:"':;`|\-+_&.,])/.test(value)
-                        ? `"${value}"`
-                        : value
-                        : ""
+                            ? /([:"';`|\-+_&.,])/.test(value)
+                            ? `"${value}"`
+                            : value
+                            : ""
                     );
                     break;
 
