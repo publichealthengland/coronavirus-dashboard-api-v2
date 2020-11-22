@@ -16,7 +16,7 @@ const despatchQuery = async (queryParams: QueryParamsType, releasedMetrics: Gene
     const release       = queryParams.release;
     const releaseDate   = queryParams.release.split(/T/)[0];
     const rawMetrics    = queryParams.metric.split(/,/).filter(metric => metric in releasedMetrics);
-    const nestedMetrics = rawMetrics.filter(metric => releasedMetrics[metric] === "list")
+    const nestedMetrics = rawMetrics.filter(metric => releasedMetrics[metric] === "list");
 
     // DB Query params
     const parameters = [
