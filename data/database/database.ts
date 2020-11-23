@@ -3,15 +3,18 @@ import { CosmosClient } from "@azure/cosmos"
 import type { SqlParameter } from "@azure/cosmos";
 
 
-const DATABASE_CONN_STR: string  = process?.env?.AzureCosmosConnectionString ?? "";
-const DATABASE_NAME: string      = process?.env?.AzureCosmosDBName ?? "";
-const DATABASE_CONTAINER: string = process?.env?.AzureCosmosCollection ?? "";
+const DB_ENDPOINT: string  = process?.env?.AzureCosmosHost ?? "";
+const DB_KEY: string       = process?.env?.AzureCosmosKey ?? "";
+const DB_NAME: string      = process?.env?.AzureCosmosDBName ?? "";
+const DB_CONTAINER: string = process?.env?.AzureCosmosCollection ?? "";
+const DB_CONN_STR: string  = `AccountEndpoint=${DB_ENDPOINT};AccountKey=${DB_KEY};`;
 
 const MAX_PAGE_LIMIT = -1;
 
-const container = new CosmosClient(DATABASE_CONN_STR)
-                .database(DATABASE_NAME)
-                .container(DATABASE_CONTAINER);
+
+const container = new CosmosClient(DB_CONN_STR)
+                .database(DB_NAME)
+                .container(DB_CONTAINER);
 
 
 /**
