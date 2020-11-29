@@ -1,13 +1,17 @@
-import getData from "../database";
-import processResults from "../processor";
+import { GetData } from "../database";
+import processResults from "../../processor";
+import { CosmosClient } from "@azure/cosmos";
+import * as vars from "./variables";
 
-import type { QueryParamsType, GenericJson } from "../types";
+import type { QueryParamsType, GenericJson } from "../../types";
 
 
-const ORDER_BY = "c.areaType ASC, c.areaCode ASC, c.date DESC";
+const container = new CosmosClient(vars.DB_CONN_STR)
+                .database(vars.DB_NAME)
+                .container(vars.PUBLIC_DATA);
 
 
-const despatchQuery = async (queryParams: QueryParamsType, releasedMetrics: GenericJson) => {
+export const mainDataQuery = async (queryParams: QueryParamsType, releasedMetrics: GenericJson) => {
 
     // Query params
     const format        = queryParams.format;
@@ -45,13 +49,15 @@ const despatchQuery = async (queryParams: QueryParamsType, releasedMetrics: Gene
         ...rawMetrics.map(metric => `'${metric}': c.${metric} ?? null`)
     ].join(", ");
 
-    const query = `SELECT VALUE {${metrics}} FROM c WHERE ${queryFilters} ORDER BY ${ORDER_BY}`;
+    const query = `SELECT VALUE {${metrics}}
+                   FROM c
+                   WHERE ${queryFilters}
+                   ORDER BY c.areaType ASC, c.areaCode ASC, c.date DESC`;
     
-    const processor = processResults(format, nestedMetrics);
+    return GetData(query, parameters, {
+        container: container,
+        partitionKey: releaseDate,
+        processor: processResults(format, nestedMetrics)
+    });
 
-    return getData(query, parameters, releaseDate, processor);
-
-};  // fromDatabase
-
-
-export default despatchQuery;
+};  // mainDataQuery

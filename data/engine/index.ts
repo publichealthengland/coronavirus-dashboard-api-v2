@@ -1,1 +1,1 @@
-export { default } from "./query";
+export { mainDataQuery, msoaQuery } from "./queries";

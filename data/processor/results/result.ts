@@ -37,7 +37,7 @@ const process = async ( data: GenericDBResponse, format: string, nestedMetrics: 
 };  // process
 
 
-const processResults = ( format: string, nestedMetrics: string[] ) => {
+const processResults = ( format: string, nestedMetrics: string[] = []) => {
 
     return (data: GenericDBResponse) => process(data, format, nestedMetrics);
 

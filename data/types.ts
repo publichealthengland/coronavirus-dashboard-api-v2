@@ -1,3 +1,5 @@
+import {Container} from "@azure/cosmos";
+
 export interface GenericJson {
     [key: string]: string
 }
@@ -26,4 +28,11 @@ export interface QueryParamsType extends GenericJson {
             | "json"
             | "jsonl"
             | "xml";
+}
+
+
+export interface GetMainDataOptions {
+    container: Container
+    partitionKey?: string
+    processor: (data: GenericDBResponse) => any
 }
