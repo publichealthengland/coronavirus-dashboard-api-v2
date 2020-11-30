@@ -49,6 +49,7 @@ export const mainDataQuery = async (queryParams: QueryParamsType, releasedMetric
         ...rawMetrics.map(metric => `'${metric}': c.${metric} ?? null`)
     ].join(", ");
 
+    // Final query
     const query = `SELECT VALUE {${metrics}}
                    FROM c
                    WHERE ${queryFilters}
