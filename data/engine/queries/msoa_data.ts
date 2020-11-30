@@ -11,6 +11,20 @@ const container = new CosmosClient(vars.DB_CONN_STR)
                 .container(vars.MSOA_DATA);
 
 
+const defaultMetrics: GenericJson = {
+    "regionCode": "c.regionCode",
+    "regionName": "c.regionName",
+    "UtlaCode":   "c.UtlaCode ?? null",
+    "UtlaName":   "c.UtlaName ?? null",
+    "LtlaCode":   "c.LtlaCode ?? null",
+    "LtlaName":   "c.LtlaName ?? null",
+    "areaType":   "c.areaType",
+    "areaCode":   "c.areaCode",
+    "areaName":   "c.areaName",
+    "date":       "cases.date"
+};
+
+
 const msoaMetrics: GenericJson = {
     'newCasesBySpecimenDateRollingSum':       'rollingSum',
     'newCasesBySpecimenDateRollingRate':      'rollingRate',
@@ -38,29 +52,35 @@ export const msoaQuery = async (queryParams: QueryParamsType) => {
     let queryFilters = "c.areaType = @areaType ";
 
     if ( areaCode ) {
-        queryFilters += `AND (
-                              c.regionCode = @areaCode
-                           OR c.UtlaCode   = @areaCode
+
+        queryFilters += `AND ( 
+                              c.areaCode   = @areaCode
                            OR c.LtlaCode   = @areaCode
-                           OR c.areaCode   = @areaCode
+                           OR c.UtlaCode   = @areaCode
+                           OR c.regionCode = @areaCode
                          )`;
 
         parameters.push({
             name: "@areaCode",
             value: areaCode
         });
-    }
+
+    } // if
 
     // Process metrics
     const metrics = [
-        "'date': cases.date",
-        "'areaType': c.areaType",
-        "'areaCode': c.areaCode",
-        "'areaName': c.areaName",
-        ...rawMetrics.map(metric => `'${metric}': cases.${msoaMetrics[metric]} ?? null`)
-    ].join(", ");
 
-    const query = `SELECT VALUE {${metrics}}
+        ...Object
+            .keys(defaultMetrics)
+            .map(key => `'${key}': ${defaultMetrics[key]}`),
+
+        ...rawMetrics
+            .map(metric => `'${metric}': cases.${msoaMetrics[metric]} ?? null`)
+
+    ];
+
+    // Final query
+    const query = `SELECT VALUE {${metrics.join(", ")}}
                    FROM c
                    JOIN cases IN c.newCasesBySpecimenDate
                    WHERE ${queryFilters}`;
