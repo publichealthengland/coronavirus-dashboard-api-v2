@@ -6,7 +6,7 @@ import * as vars from "./variables";
 import type { QueryParamsType, GenericJson } from "../../types";
 
 
-const container = new CosmosClient(vars.DB_CONN_STR)
+const container = new CosmosClient(vars.DB_CONNECTION)
                 .database(vars.DB_NAME)
                 .container(vars.MSOA_DATA);
 
