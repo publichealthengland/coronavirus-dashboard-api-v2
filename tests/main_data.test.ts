@@ -19,9 +19,9 @@ describe("main_data", () => {
         } 
         
         const releasedMetrics: GenericJson = {
-                "newCasesByPublish": "newCasesByPublish",
-                "femaleCases": "femaleCases",
-                "maleCases": "maleCases"
+            "newCasesByPublish": "newCasesByPublish",
+            "femaleCases": "femaleCases",
+            "maleCases": "maleCases"
         }
 
         it('JSON integrity', async () => {
@@ -48,6 +48,60 @@ describe("main_data", () => {
                     `${key} not found.`
                 );
             }
+
+        });
+
+    });
+
+    describe('#getCSV', () => {
+
+        const resultsStructure: GenericJson = {
+            "date": "date",
+            "areaType": "areaType",
+            "areaCode": "areaCode",
+            "areaName": "areaName" ,
+            "newCasesByPublish": "newCasesByPublish",
+            "femaleCases": "femaleCases",
+            "maleCases": "maleCases"
+        };
+
+        const queryParams: QueryParamsType = {
+            areaType: "nation",
+            areaCode: "E92000001",
+            release: "2020-11-20T16:53:34.0092775Z",
+            metric: "newCasesByPublish,femaleCases,maleCases",
+            format: "csv"
+        };
+        
+        const releasedMetrics: GenericJson = {
+            "newCasesByPublish": "newCasesByPublish",
+            "femaleCases": "femaleCases",
+            "maleCases": "maleCases"
+        };
+
+        it('CSV integrity', async () => {
+        
+            const csvData =  await mainDataQuery(queryParams, releasedMetrics);
+
+            assert.strictEqual(typeof csvData, "object");
+            assert.strictEqual("body" in csvData, true);
+            assert.strictEqual("headers" in csvData, true);
+
+            assert.strictEqual(typeof csvData.body, "string");
+
+            assert.strictEqual(
+                csvData.body.split("\n").length > 10,
+                true
+            );
+           
+            assert.strictEqual(
+                csvData
+                    .body
+                    .split("\n")[0]
+                    .trim(),
+                Object.keys(resultsStructure)
+                    .join(","),
+            );
 
         });
 
