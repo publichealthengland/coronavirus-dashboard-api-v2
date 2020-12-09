@@ -8,21 +8,23 @@ import { mainDataQuery } from '../data/engine';
 
 describe("main_data", () => {
 
+    const releasedMetrics: GenericJson = {
+        "newCasesByPublish": "newCasesByPublish",
+        "femaleCases": "femaleCases",
+        "maleCases": "maleCases"
+    };
+
+    const metrics = "newCasesByPublish,femaleCases,maleCases";
+
     describe('#getJSON', () => {
 
         const queryParams: QueryParamsType = {
             areaType: "nation",
             areaCode: "E92000001",
             release: "2020-11-20T16:53:34.0092775Z",
-            metric: "newCasesByPublish,femaleCases,maleCases",
+            metric: metrics,
             format: "json"
-        } 
-        
-        const releasedMetrics: GenericJson = {
-            "newCasesByPublish": "newCasesByPublish",
-            "femaleCases": "femaleCases",
-            "maleCases": "maleCases"
-        }
+        };  
 
         it('JSON integrity', async () => {
         
@@ -69,15 +71,10 @@ describe("main_data", () => {
             areaType: "nation",
             areaCode: "E92000001",
             release: "2020-11-20T16:53:34.0092775Z",
-            metric: "newCasesByPublish,femaleCases,maleCases",
+            metric: metrics,
             format: "csv"
         };
         
-        const releasedMetrics: GenericJson = {
-            "newCasesByPublish": "newCasesByPublish",
-            "femaleCases": "femaleCases",
-            "maleCases": "maleCases"
-        };
 
         it('CSV integrity', async () => {
         
@@ -106,5 +103,52 @@ describe("main_data", () => {
         });
 
     });
+
+    describe('#getJSONL', () => {
+
+        const queryParams: QueryParamsType = {
+            areaType: "nation",
+            areaCode: "E92000001",
+            release: "2020-11-20T16:53:34.0092775Z",
+            metric: metrics,
+            format: "jsonl"
+        };
+        
+        it('JSONL integrity', async () => {
+        
+            const jsonlData =  await mainDataQuery(queryParams, releasedMetrics);
+
+            assert.strictEqual(typeof jsonlData, "object");
+            assert.strictEqual("body" in jsonlData, true);
+            assert.strictEqual("headers" in jsonlData, true);
+
+            assert.strictEqual(typeof jsonlData.body, "string");
+
+
+            assert.strictEqual(
+                jsonlData.body.split("\n").length > 10,
+                true
+            );
+           
+            const arr = jsonlData.body.split("\n");
+            const metrics_arr = metrics.split(",");
+
+             for(let i = 0; i < arr.length; i++) {
+
+                const json = JSON.parse(arr[i])
+                for(let j = 0; j <  metrics_arr.length; j++) {
+    
+                    assert.strictEqual(
+                        metrics_arr[j] in json,
+                        true,
+                        `${arr[i]} not found.`
+                    );
+                }
+            }
+
+        });
+
+    });
+
 
 });
