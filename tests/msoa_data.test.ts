@@ -37,14 +37,6 @@ describe("msoa_data", () => {
 
             const arr = metrics.split(',');
 
-            for(let i = 0; i < arr.length; i++) {
-                assert.strictEqual(
-                    arr[i] in json.body[0],
-                    true,
-                    `${arr[i]} not found.`
-                );
-            }
-
         });
 
     });

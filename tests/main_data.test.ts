@@ -21,7 +21,7 @@ describe("main_data", () => {
         const queryParams: QueryParamsType = {
             areaType: "nation",
             areaCode: "E92000001",
-            release: "2020-11-20T16:53:34.0092775Z",
+            release: "2020-11-20T00:00:00.000Z",
             metric: metrics,
             format: "json"
         };  
@@ -35,6 +35,10 @@ describe("main_data", () => {
             assert.strictEqual("headers" in jsonData, true);
 
             const json = JSON.parse(jsonData.body);
+
+            const max_data_date = new Date(Math.max(...json.body.map((e: GenericJson) => new Date(e.date))));
+
+            assert.strictEqual (max_data_date.getTime() <= new Date(queryParams.release).getTime(), true)
 
             assert.strictEqual("length" in json, true);
             assert.strictEqual("body" in  json, true);
@@ -70,7 +74,7 @@ describe("main_data", () => {
         const queryParams: QueryParamsType = {
             areaType: "nation",
             areaCode: "E92000001",
-            release: "2020-11-20T16:53:34.0092775Z",
+            release: "2020-11-20T00:00:00.000Z",
             metric: metrics,
             format: "csv"
         };
@@ -84,20 +88,16 @@ describe("main_data", () => {
             assert.strictEqual("body" in csvData, true);
             assert.strictEqual("headers" in csvData, true);
 
+            const arr = csvData.body.split("\n").slice(1);
+            const max_data_date = new Date(Math.max(...arr.map((e: string) => new Date(e.split(",")[0]))));
+
+            assert.strictEqual (max_data_date.getTime() <= new Date(queryParams.release).getTime(), true)
+
             assert.strictEqual(typeof csvData.body, "string");
 
             assert.strictEqual(
                 csvData.body.split("\n").length > 10,
                 true
-            );
-           
-            assert.strictEqual(
-                csvData
-                    .body
-                    .split("\n")[0]
-                    .trim(),
-                Object.keys(resultsStructure)
-                    .join(","),
             );
 
         });
@@ -109,7 +109,7 @@ describe("main_data", () => {
         const queryParams: QueryParamsType = {
             areaType: "nation",
             areaCode: "E92000001",
-            release: "2020-11-20T16:53:34.0092775Z",
+            release: "2020-11-20T00:00:00.000Z",
             metric: metrics,
             format: "jsonl"
         };
@@ -130,21 +130,10 @@ describe("main_data", () => {
                 true
             );
            
-            const arr = jsonlData.body.split("\n");
-            const metrics_arr = metrics.split(",");
+            const arr = jsonlData.body.split("\n").slice(1);
+            const max_data_date = new Date(Math.max(...arr.map((e: string) => new Date((JSON.parse(e)).date))));
 
-             for(let i = 0; i < arr.length; i++) {
-
-                const json = JSON.parse(arr[i])
-                for(let j = 0; j <  metrics_arr.length; j++) {
-    
-                    assert.strictEqual(
-                        metrics_arr[j] in json,
-                        true,
-                        `${arr[i]} not found.`
-                    );
-                }
-            }
+            assert.strictEqual (max_data_date.getTime() <= new Date(queryParams.release).getTime(), true)
 
         });
 
