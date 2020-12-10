@@ -11,7 +11,8 @@ export interface DBObject {
 
 
 export interface DBResponseItem {
-    [key: string]: DBObject[] | DBObject 
+    [key: string]: DBObject[] | DBObject | string | number | boolean | null
+}
 }
 
 

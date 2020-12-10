@@ -5,17 +5,18 @@ import assert from "assert";
 import type { QueryParamsType, GenericJson } from "../data/types";
 
 import { msoaQuery } from '../data/engine';
-import { max } from "moment";
 
 describe("msoa_data", () => {
 
 
     const metrics = "newCasesBySpecimenDateRollingSum,newCasesBySpecimenDateRollingRate";
+
+    const releaseDate = "2020-12-05T00:00:00.000Z"
     
     const queryParams: QueryParamsType = {
         areaType: "msoa",
         areaCode: "E09000014",
-        release: "2020-12-04T00:00:00.000Z",
+        release: releaseDate,
         metric: metrics,
         format: "json"
     } 
@@ -81,7 +82,7 @@ describe("msoa_data", () => {
             const arr = csvData.body.split("\n").slice(1);
             const max_data_date = new Date(Math.max(...arr.map((e: string) => new Date(e.split(",")[9]))));
 
-            assert.strictEqual (max_data_date.getTime() <= new Date(queryParams.release).getTime(), true)
+            assert.strictEqual (max_data_date.getTime() <= new Date(releaseDate).getTime(), true)
 
 
             assert.strictEqual(
@@ -118,7 +119,7 @@ describe("msoa_data", () => {
             const arr = jsonlData.body.split("\n").slice(1);
             const max_data_date = new Date(Math.max(...arr.map((e: string) => new Date((JSON.parse(e)).date))));
 
-            assert.strictEqual (max_data_date.getTime() <= new Date(queryParams.release).getTime(), true)
+            assert.strictEqual (max_data_date.getTime() <= new Date(releaseDate).getTime(), true)
 
 
         });

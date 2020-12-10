@@ -14,12 +14,16 @@ describe("main_data", () => {
         "maleCases": "maleCases"
     };
 
+    const releaseDate = "2020-11-20T00:00:00.000Z"
+
     const metrics = "newCasesByPublish,femaleCases,maleCases";
+
+
 
     const queryParams: QueryParamsType = {
         areaType: "nation",
         areaCode: "E92000001",
-        release: "2020-11-20T00:00:00.000Z",
+        release: releaseDate,
         metric: metrics,
         format: "json"
     };  
@@ -42,7 +46,7 @@ describe("main_data", () => {
 
             const max_data_date = new Date(Math.max(...json.body.map((e: GenericJson) => new Date(e.date))));
 
-            assert.strictEqual (max_data_date.getTime() <= new Date(queryParams.release).getTime(), true)
+            assert.strictEqual (max_data_date.getTime() <= new Date(releaseDate).getTime(), true)
 
             assert.strictEqual("length" in json, true);
             assert.strictEqual("body" in  json, true);
@@ -91,7 +95,7 @@ describe("main_data", () => {
             const arr = csvData.body.split("\n").slice(1);
             const max_data_date = new Date(Math.max(...arr.map((e: string) => new Date(e.split(",")[0]))));
 
-            assert.strictEqual (max_data_date.getTime() <= new Date(queryParams.release).getTime(), true)
+            assert.strictEqual (max_data_date.getTime() <= new Date(releaseDate).getTime(), true)
 
            
 
@@ -137,7 +141,7 @@ describe("main_data", () => {
             const arr = jsonlData.body.split("\n").slice(1);
             const max_data_date = new Date(Math.max(...arr.map((e: string) => new Date((JSON.parse(e)).date))));
 
-            assert.strictEqual (max_data_date.getTime() <= new Date(queryParams.release).getTime(), true)
+            assert.strictEqual (max_data_date.getTime() <= new Date(releaseDate).getTime(), true)
 
         });
 
