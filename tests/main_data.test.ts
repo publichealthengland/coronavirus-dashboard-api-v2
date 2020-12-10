@@ -16,17 +16,21 @@ describe("main_data", () => {
 
     const metrics = "newCasesByPublish,femaleCases,maleCases";
 
+    const queryParams: QueryParamsType = {
+        areaType: "nation",
+        areaCode: "E92000001",
+        release: "2020-11-20T00:00:00.000Z",
+        metric: metrics,
+        format: "json"
+    };  
+
     describe('#getJSON', () => {
 
-        const queryParams: QueryParamsType = {
-            areaType: "nation",
-            areaCode: "E92000001",
-            release: "2020-11-20T00:00:00.000Z",
-            metric: metrics,
-            format: "json"
-        };  
+        
 
         it('JSON integrity', async () => {
+
+            queryParams["format"] = "json"
         
             const jsonData =  await mainDataQuery(queryParams, releasedMetrics);
                       
@@ -71,33 +75,38 @@ describe("main_data", () => {
             "maleCases": "maleCases"
         };
 
-        const queryParams: QueryParamsType = {
-            areaType: "nation",
-            areaCode: "E92000001",
-            release: "2020-11-20T00:00:00.000Z",
-            metric: metrics,
-            format: "csv"
-        };
-        
+       
 
         it('CSV integrity', async () => {
+
+            queryParams["format"] = "csv"
         
             const csvData =  await mainDataQuery(queryParams, releasedMetrics);
 
             assert.strictEqual(typeof csvData, "object");
             assert.strictEqual("body" in csvData, true);
             assert.strictEqual("headers" in csvData, true);
+            assert.strictEqual(typeof csvData.body, "string");
 
             const arr = csvData.body.split("\n").slice(1);
             const max_data_date = new Date(Math.max(...arr.map((e: string) => new Date(e.split(",")[0]))));
 
             assert.strictEqual (max_data_date.getTime() <= new Date(queryParams.release).getTime(), true)
 
-            assert.strictEqual(typeof csvData.body, "string");
+           
 
             assert.strictEqual(
                 csvData.body.split("\n").length > 10,
                 true
+            );
+
+            assert.strictEqual(
+                csvData
+                    .body
+                    .split("\n")[0]
+                    .trim(),
+                Object.keys(resultsStructure)
+                    .join(","),
             );
 
         });
@@ -106,15 +115,10 @@ describe("main_data", () => {
 
     describe('#getJSONL', () => {
 
-        const queryParams: QueryParamsType = {
-            areaType: "nation",
-            areaCode: "E92000001",
-            release: "2020-11-20T00:00:00.000Z",
-            metric: metrics,
-            format: "jsonl"
-        };
         
         it('JSONL integrity', async () => {
+
+            queryParams["format"] = "jsonl"
         
             const jsonlData =  await mainDataQuery(queryParams, releasedMetrics);
 
