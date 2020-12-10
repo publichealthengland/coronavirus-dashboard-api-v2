@@ -11,11 +11,15 @@ import { GetData } from '../data/engine/database';
 
 import { CosmosClient } from "@azure/cosmos";
 
-describe("from_db", () => {
+describe("from_db main", () => {
 
 
     const releaseDate = "2020-11-20";
 
+    
+    const container = new CosmosClient(vars.DB_CONNECTION)
+                        .database(vars.DB_NAME)
+                        .container(vars.PUBLIC_DATA);
 
     const runTest = async (format: string)  => {
         
@@ -29,10 +33,7 @@ describe("from_db", () => {
         const nestedMetrics: string[] = [
         ]
 
-        const container = new CosmosClient(vars.DB_CONNECTION)
-            .database(vars.DB_NAME)
-            .container(vars.PUBLIC_DATA);
-        
+       
         // DB Query params
         const parameters = [
             {
@@ -71,7 +72,11 @@ describe("from_db", () => {
         return data
     }
 
-    describe('#getMainData', () => {
+    describe('#getData', () => {
+
+        const container = new CosmosClient(vars.DB_CONNECTION)
+                            .database(vars.DB_NAME)
+                            .container(vars.PUBLIC_DATA);
 
         it('JSON integrity', async () => {
 
@@ -96,7 +101,7 @@ describe("from_db", () => {
 
     });
 
-    describe('#getMainData', () => {
+    describe('#getData', () => {
 
         const resultsStructure: GenericJson = {
             "date": "date",
@@ -108,7 +113,7 @@ describe("from_db", () => {
             "maleCases": "maleCases"
         };
 
-        it('JCSV integrity', async () => {
+        it('CSV integrity', async () => {
 
             const csvData =  await runTest("csv")
             
@@ -142,7 +147,7 @@ describe("from_db", () => {
 
     });
 
-    describe('#getMainData', () => {
+    describe('#getData', () => {
 
         it('JSONL integrity', async () => {
 
