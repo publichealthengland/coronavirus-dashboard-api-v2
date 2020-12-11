@@ -2,7 +2,6 @@ import { describe, it } from "mocha";
 
 import assert from "assert";
 
-
 import type { GenericDBResponse, GenericJson } from "../data/types";
 
 import { mainResultsStructure, msoaResultsStructure } from './vars';
