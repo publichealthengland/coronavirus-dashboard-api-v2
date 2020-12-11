@@ -26,7 +26,7 @@ const container = new CosmosClient(DB_CONNECTION)
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
 
-    context.log('Processing helathcheck request');
+    context.log('Processing healthcheck request');
 
     const query = `SELECT TOP 1 * FROM c WHERE c.type = 'general'`;
 
