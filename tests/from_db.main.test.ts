@@ -5,6 +5,8 @@ import assert from "assert";
 import type { GenericJson } from "../data/types";
 import processResults from "../data/processor";
 
+import { mainResultsStructure } from './vars';
+
 import * as vars from "../data/engine/queries/variables";
 
 import { GetData } from '../data/engine/database';
@@ -31,7 +33,7 @@ describe("from_db main", () => {
         ];
 
         const nestedMetrics: string[] = [
-        ]
+        ];
 
        
         // DB Query params
@@ -74,28 +76,22 @@ describe("from_db main", () => {
 
     describe('#getData', () => {
 
-        const container = new CosmosClient(vars.DB_CONNECTION)
-                            .database(vars.DB_NAME)
-                            .container(vars.PUBLIC_DATA);
-
         it('JSON integrity', async () => {
 
-            const jsonData =  await runTest("json")
+            const jsonData =  await runTest("json");
+
             assert.strictEqual(typeof jsonData, "object");
             assert.strictEqual("body" in jsonData, true);
             assert.strictEqual("headers" in jsonData, true);
 
             const json = JSON.parse(jsonData.body);
-
-            const max_data_date = new Date(Math.max(...json.body.map((e: GenericJson) => new Date(e.date))));
-
-            assert.strictEqual (max_data_date.getTime() <= new Date(releaseDate).getTime(), true)
-
             assert.strictEqual("length" in json, true);
             assert.strictEqual("body" in  json, true);
 
-            assert.strictEqual(json.length > 10, true);
+            const max_data_date = new Date(Math.max(...json.body.map((e: GenericJson) => new Date(e.date))));
+            assert.strictEqual (max_data_date.getTime() <= new Date(releaseDate).getTime(), true);
 
+            assert.strictEqual(json.length > 10, true);
 
         });
 
@@ -103,19 +99,9 @@ describe("from_db main", () => {
 
     describe('#getData', () => {
 
-        const resultsStructure: GenericJson = {
-            "date": "date",
-            "areaType": "areaType",
-            "areaCode": "areaCode",
-            "areaName": "areaName" ,
-            "newCasesByPublish": "newCasesByPublish",
-            "femaleCases": "femaleCases",
-            "maleCases": "maleCases"
-        };
-
         it('CSV integrity', async () => {
 
-            const csvData =  await runTest("csv")
+            const csvData =  await runTest("csv");
             
             assert.strictEqual(typeof csvData, "object");
             assert.strictEqual("body" in csvData, true);
@@ -124,10 +110,7 @@ describe("from_db main", () => {
 
             const arr = csvData.body.split("\n").slice(1);
             const max_data_date = new Date(Math.max(...arr.map((e: string) => new Date(e.split(",")[0]))));
-
-            assert.strictEqual (max_data_date.getTime() <= new Date(releaseDate).getTime(), true)
-
-           
+            assert.strictEqual (max_data_date.getTime() <= new Date(releaseDate).getTime(), true);
 
             assert.strictEqual(
                 csvData.body.split("\n").length > 10,
@@ -139,7 +122,7 @@ describe("from_db main", () => {
                     .body
                     .split("\n")[0]
                     .trim(),
-                Object.keys(resultsStructure)
+                Object.keys(mainResultsStructure)
                     .join(","),
             );
 
@@ -151,7 +134,7 @@ describe("from_db main", () => {
 
         it('JSONL integrity', async () => {
 
-            const jsonlData =  await runTest("jsonl")
+            const jsonlData =  await runTest("jsonl");
            
             assert.strictEqual(typeof jsonlData, "object");
             assert.strictEqual("body" in jsonlData, true);
@@ -167,8 +150,7 @@ describe("from_db main", () => {
            
             const arr = jsonlData.body.split("\n").slice(1);
             const max_data_date = new Date(Math.max(...arr.map((e: string) => new Date((JSON.parse(e)).date))));
-
-            assert.strictEqual (max_data_date.getTime() <= new Date(releaseDate).getTime(), true)
+            assert.strictEqual (max_data_date.getTime() <= new Date(releaseDate).getTime(), true);
         });
 
     });

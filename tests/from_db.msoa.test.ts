@@ -7,6 +7,10 @@ import processResults from "../data/processor";
 
 import * as vars from "../data/engine/queries/variables";
 
+import { msoaResultsStructure } from './vars';
+
+import moment from "moment";
+
 import { GetData } from '../data/engine/database';
 
 import { CosmosClient } from "@azure/cosmos";
@@ -14,9 +18,10 @@ import { CosmosClient } from "@azure/cosmos";
 describe("from_db msoa", () => {
 
 
-    const releaseDate = "2020-12-04";
+    let today = new Date ();
 
-    
+    const releaseDate =  moment(today.setDate(today.getDate()-1)).format( "YYYY-MM-DD");
+
     const container = new CosmosClient(vars.DB_CONNECTION)
                         .database(vars.DB_NAME)
                         .container(vars.MSOA_DATA);
@@ -101,20 +106,18 @@ describe("from_db msoa", () => {
 
         it('JSON integrity', async () => {
 
-            const jsonData =  await runTest("json")
+            const jsonData =  await runTest("json");
+
             assert.strictEqual(typeof jsonData, "object");
             assert.strictEqual("body" in jsonData, true);
             assert.strictEqual("headers" in jsonData, true);
 
             const json = JSON.parse(jsonData.body);
 
-
             assert.strictEqual("length" in json, true);
             assert.strictEqual("body" in  json, true);
 
             assert.strictEqual(json.length > 10, true);
-
-
         });
 
     });
@@ -123,7 +126,7 @@ describe("from_db msoa", () => {
 
         it('CSV integrity', async () => {
 
-            const csvData =  await runTest("csv")
+            const csvData =  await runTest("csv");
             
             assert.strictEqual(typeof csvData, "object");
             assert.strictEqual("body" in csvData, true);
@@ -153,7 +156,7 @@ describe("from_db msoa", () => {
 
         it('JSONL integrity', async () => {
 
-            const jsonlData =  await runTest("jsonl")
+            const jsonlData =  await runTest("jsonl");
            
             assert.strictEqual(typeof jsonlData, "object");
             assert.strictEqual("body" in jsonlData, true);
@@ -170,6 +173,4 @@ describe("from_db msoa", () => {
         });
 
     });
-
-
 });

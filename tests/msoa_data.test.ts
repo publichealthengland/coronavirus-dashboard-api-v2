@@ -6,12 +6,20 @@ import type { QueryParamsType, GenericJson } from "../data/types";
 
 import { msoaQuery } from '../data/engine';
 
+import { msoaResultsStructure } from './vars';
+
+import moment from 'moment';
+
 describe("msoa_data", () => {
 
+    const metrics = "newCasesBySpecimenDateRollingSum," +
+                    "newCasesBySpecimenDateRollingRate," +
+                    "newCasesBySpecimenDateChange," +
+                    "newCasesBySpecimenDateChangePercentage," +
+                    "newCasesBySpecimenDateDirection"
 
-    const metrics = "newCasesBySpecimenDateRollingSum,newCasesBySpecimenDateRollingRate";
-
-    const releaseDate = "2020-12-05T00:00:00.000Z"
+    let today = new Date ();
+    const releaseDate =  moment(today.setDate(today.getDate()-1)).format( "YYYY-MM-DD");
     
     const queryParams: QueryParamsType = {
         areaType: "msoa",
@@ -38,7 +46,6 @@ describe("msoa_data", () => {
 
             assert.strictEqual("length" in json, true);
             assert.strictEqual("body" in  json, true);
-
             assert.strictEqual(json.length > 10, true);
 
         });
@@ -48,23 +55,7 @@ describe("msoa_data", () => {
     describe('#getCSV', () => {
 
         it('CSV integrity', async () => {
-
-            const resultsStructure: GenericJson = {
-                "regionCode": "regionCode",
-                "regionName": "regionName",
-                "UtlaCode": "UtlaCode",
-                "UtlaName": "UtlaName",
-                "LtlaCode": "LtlaCode",
-                "LtlaName": "LtlaName",
-                "areaType": "areaType",
-                "areaCode": "areaCode",
-                "areaName": "areaName",
-                "date": "date",
-                "newCasesBySpecimenDateRollingSum": "newCasesBySpecimenDateRollingSum",
-                "newCasesBySpecimenDateRollingRate": "newCasesBySpecimenDateRollingRate"
-            }
-
-                
+    
             queryParams["format"] = "csv";
         
             const csvData =  await msoaQuery(queryParams);
@@ -81,16 +72,14 @@ describe("msoa_data", () => {
 
             const arr = csvData.body.split("\n").slice(1);
             const max_data_date = new Date(Math.max(...arr.map((e: string) => new Date(e.split(",")[9]))));
-
             assert.strictEqual (max_data_date.getTime() <= new Date(releaseDate).getTime(), true)
-
 
             assert.strictEqual(
                 csvData
                     .body
                     .split("\n")[0]
                     .trim(),
-                Object.keys(resultsStructure)
+                Object.keys(msoaResultsStructure)
                     .join(","),
             );
 
@@ -118,12 +107,8 @@ describe("msoa_data", () => {
 
             const arr = jsonlData.body.split("\n").slice(1);
             const max_data_date = new Date(Math.max(...arr.map((e: string) => new Date((JSON.parse(e)).date))));
-
-            assert.strictEqual (max_data_date.getTime() <= new Date(releaseDate).getTime(), true)
-
-
+            assert.strictEqual (max_data_date.getTime() <= new Date(releaseDate).getTime(), true);
         });
-
     });
 
 });
