@@ -14,13 +14,15 @@ export const mainResultsStructure: GenericJson = {
     "areaType": "areaType",
     "areaCode": "areaCode",
     "areaName": "areaName" ,
-    "newCasesByPublish": "newCasesByPublish",
-    "femaleCases": "femaleCases",
-    "maleCases": "maleCases"
+    "metric": "metric",
+    "age": "age",
+    "rate": "rate",
+    "value": "value"
 };
 
+
 export const msoaResultsStructure: GenericJson = {
-     "regionCode": "regionCode",
+        "regionCode": "regionCode",
         "regionName": "regionName",
         "UtlaCode": "UtlaCode",
         "UtlaName": "UtlaName",

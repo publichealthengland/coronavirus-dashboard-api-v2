@@ -5,8 +5,6 @@ import assert from "assert";
 import type { GenericJson } from "../data/types";
 import processResults from "../data/processor";
 
-import { mainResultsStructure } from './vars';
-
 import * as vars from "../data/engine/queries/variables";
 
 import { GetData } from '../data/engine/database';
@@ -18,6 +16,17 @@ describe("from_db main", () => {
 
     const releaseDate = "2020-11-20";
 
+    const resultsStructure: GenericJson = {
+        "date": "date",
+        "areaType": "areaType",
+        "areaCode": "areaCode",
+        "areaName": "areaName" ,
+        "metric": "metric",
+        "age": "age",
+        "value": "value",
+        "rate": "rate"
+    };
+    
     
     const container = new CosmosClient(vars.DB_CONNECTION)
                         .database(vars.DB_NAME)
@@ -27,15 +36,16 @@ describe("from_db main", () => {
         
        
         const rawMetrics: string[] = [
-            "newCasesByPublish", 
+            "newCasesByPublishDate", 
             "femaleCases",
             "maleCases"
         ];
 
         const nestedMetrics: string[] = [
+            "maleCases", 
+            "femaleCases"
         ];
 
-       
         // DB Query params
         const parameters = [
             {
@@ -74,7 +84,7 @@ describe("from_db main", () => {
         return data
     }
 
-    describe('#getData', () => {
+    describe('#GetData', () => {
 
         it('JSON integrity', async () => {
 
@@ -88,17 +98,13 @@ describe("from_db main", () => {
             assert.strictEqual("length" in json, true);
             assert.strictEqual("body" in  json, true);
 
-            const max_data_date = new Date(Math.max(...json.body.map((e: GenericJson) => new Date(e.date))));
-            assert.strictEqual (max_data_date.getTime() <= new Date(releaseDate).getTime(), true);
-
+            const max_response_date = Math.max(...json.body.map((e: GenericJson) => new Date(e.date).getTime()));
+            assert.strictEqual (max_response_date <= new Date(releaseDate).getTime(), true);
             assert.strictEqual(json.length > 10, true);
 
         });
 
-    });
-
-    describe('#getData', () => {
-
+    
         it('CSV integrity', async () => {
 
             const csvData =  await runTest("csv");
@@ -109,8 +115,8 @@ describe("from_db main", () => {
             assert.strictEqual(typeof csvData.body, "string");
 
             const arr = csvData.body.split("\n").slice(1);
-            const max_data_date = new Date(Math.max(...arr.map((e: string) => new Date(e.split(",")[0]))));
-            assert.strictEqual (max_data_date.getTime() <= new Date(releaseDate).getTime(), true);
+            const max_response_date = Math.max(...arr.map((e: string) => new Date(e.split(",")[0]).getTime()));
+            assert.strictEqual (max_response_date <= new Date(releaseDate).getTime(), true);
 
             assert.strictEqual(
                 csvData.body.split("\n").length > 10,
@@ -122,15 +128,12 @@ describe("from_db main", () => {
                     .body
                     .split("\n")[0]
                     .trim(),
-                Object.keys(mainResultsStructure)
+                Object.keys(resultsStructure)
                     .join(","),
             );
 
         });
 
-    });
-
-    describe('#getData', () => {
 
         it('JSONL integrity', async () => {
 
@@ -149,8 +152,8 @@ describe("from_db main", () => {
             );
            
             const arr = jsonlData.body.split("\n").slice(1);
-            const max_data_date = new Date(Math.max(...arr.map((e: string) => new Date((JSON.parse(e)).date))));
-            assert.strictEqual (max_data_date.getTime() <= new Date(releaseDate).getTime(), true);
+            const max_response_date = Math.max(...arr.map((e: string) => new Date((JSON.parse(e)).date).getTime()));
+            assert.strictEqual (max_response_date <= new Date(releaseDate).getTime(), true);
         });
 
     });

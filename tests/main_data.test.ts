@@ -6,18 +6,27 @@ import type { QueryParamsType, GenericJson } from "../data/types";
 
 import { mainDataQuery } from '../data/engine';
 
-import { mainResultsStructure } from './vars';
-
 describe("main_data", () => {
 
     const releasedMetrics: GenericJson = {
-        "newCasesByPublish": "newCasesByPublish",
-        "femaleCases": "femaleCases",
-        "maleCases": "maleCases"
+        "newCasesByPublishDate": "int",
+        "femaleCases":"list",
+        "maleCases":"list"
+    };
+
+    const resultsStructure: GenericJson = {
+        "date": "date",
+        "areaType": "areaType",
+        "areaCode": "areaCode",
+        "areaName": "areaName" ,
+        "metric": "metric",
+        "age": "age",
+        "value": "value",
+        "rate": "rate"
     };
 
     const releaseDate = "2020-11-20T00:00:00.000Z";
-    const metrics = "newCasesByPublish,femaleCases,maleCases";
+    const metrics = "newCasesByPublishDate,femaleCases,maleCases";
 
     const queryParams: QueryParamsType = {
         areaType: "nation",
@@ -27,7 +36,7 @@ describe("main_data", () => {
         format: "json"
     };  
 
-    describe('#getJSON', () => {
+    describe('#mainDataQuery', () => {
 
         it('JSON integrity', async () => {
 
@@ -43,8 +52,8 @@ describe("main_data", () => {
             assert.strictEqual("length" in json, true);
             assert.strictEqual("body" in  json, true);
 
-            const max_data_date = new Date(Math.max(...json.body.map((e: GenericJson) => new Date(e.date))));
-            assert.strictEqual (max_data_date.getTime() <= new Date(releaseDate).getTime(), true);
+            const max_response_date = Math.max(...json.body.map((e: GenericJson) => new Date(e.date).getTime()));
+            assert.strictEqual (max_response_date <= new Date(releaseDate).getTime(), true);
  
             assert.strictEqual(json.length > 10, true);
 
@@ -52,7 +61,7 @@ describe("main_data", () => {
 
     });
 
-    describe('#getCSV', () => {
+    describe('#mainDataQuery', () => {
 
         it('CSV integrity', async () => {
 
@@ -66,8 +75,8 @@ describe("main_data", () => {
             assert.strictEqual(typeof csvData.body, "string");
 
             const arr = csvData.body.split("\n").slice(1);
-            const max_data_date = new Date(Math.max(...arr.map((e: string) => new Date(e.split(",")[0]))));
-            assert.strictEqual (max_data_date.getTime() <= new Date(releaseDate).getTime(), true);
+            const max_response_date = Math.max(...arr.map((e: string) => new Date(e.split(",")[0]).getTime()));
+            assert.strictEqual (max_response_date <= new Date(releaseDate).getTime(), true);
 
             assert.strictEqual(
                 csvData.body.split("\n").length > 10,
@@ -79,7 +88,7 @@ describe("main_data", () => {
                     .body
                     .split("\n")[0]
                     .trim(),
-                Object.keys(mainResultsStructure)
+                Object.keys(resultsStructure)
                     .join(","),
             );
 
@@ -87,7 +96,7 @@ describe("main_data", () => {
 
     });
 
-    describe('#getJSONL', () => {
+    describe('#mainDataQuery', () => {
 
         
         it('JSONL integrity', async () => {
@@ -108,8 +117,8 @@ describe("main_data", () => {
             );
            
             const arr = jsonlData.body.split("\n").slice(1);
-            const max_data_date = new Date(Math.max(...arr.map((e: string) => new Date((JSON.parse(e)).date))));
-            assert.strictEqual (max_data_date.getTime() <= new Date(releaseDate).getTime(), true)
+            const max_response_date = Math.max(...arr.map((e: string) => new Date((JSON.parse(e)).date).getTime()));
+            assert.strictEqual (max_response_date <= new Date(releaseDate).getTime(), true)
 
         });
 

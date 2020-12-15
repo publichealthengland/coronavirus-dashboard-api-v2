@@ -29,7 +29,7 @@ describe("msoa_data", () => {
         format: "json"
     } 
 
-    describe('#getJSON', () => {
+    describe('#msoaQuery', () => {
 
      
         it('JSON integrity', async () => {
@@ -48,11 +48,14 @@ describe("msoa_data", () => {
             assert.strictEqual("body" in  json, true);
             assert.strictEqual(json.length > 10, true);
 
+            const max_response_date = Math.max(...json.body.map((e: GenericJson) => new Date(e.date).getTime()));
+            assert.strictEqual (max_response_date <= new Date(releaseDate).getTime(), true);
+
         });
 
     });
 
-    describe('#getCSV', () => {
+    describe('#msoaQuery', () => {
 
         it('CSV integrity', async () => {
     
@@ -87,7 +90,7 @@ describe("msoa_data", () => {
 
     });
 
-    describe('#getJSONL', () => {
+    describe('#msoaQuery', () => {
 
         it('JSONL integrity', async () => {
                 

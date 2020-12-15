@@ -7,21 +7,11 @@ import type { GenericDBResponse, GenericJson } from "../data/types";
 import { mainResultsStructure, msoaResultsStructure } from './vars';
 
 import toCSV from '../data/processor/csv';
+import { generateKeyPair } from "crypto";
 
 describe("csv", () => {
 
     describe('#toCSV main', () => {
-
-        const resultsStructure: GenericJson = {
-            "date": "date",
-            "areaType": "areaType",
-            "areaCode": "areaCode",
-            "areaName": "areaName" ,
-            "metric": "metric",
-            "age": "age",
-            "rate": "rate",
-            "value": "value"
-        };
 
         const data = [
             {
@@ -29,7 +19,7 @@ describe("csv", () => {
                 areaType: 'nation',
                 areaCode: 'E92000001',
                 areaName: 'England',
-                newCasesByPublish: 300,
+                newCasesByPublishDate: 300,
                 femaleCases:  [
                     {"age":"55_to_59","rate":2517.1,"value":48502},
                     {"age":"20_to_24","rate":4088.8,"value":64919}
@@ -44,7 +34,7 @@ describe("csv", () => {
                 areaType: 'nation',
                 areaCode: 'E92000001',
                 areaName: 'England',
-                newCasesByPublish: 300,
+                newCasesByPublishDate: 300,
                 femaleCases:  [
                     {"age":"55_to_59","rate":2517.1,"value":48502},
                     {"age":"20_to_24","rate":4088.8,"value":64919}
@@ -59,7 +49,7 @@ describe("csv", () => {
                 areaType: 'nation',
                 areaCode: 'E92000001',
                 areaName: 'England',
-                newCasesByPublish: 110,
+                newCasesByPublishDate: 110,
                 femaleCases:  [
                     {"age":"55_to_59","rate":2517.1,"value":48502},
                     {"age":"20_to_24","rate":4088.8,"value":64919}
@@ -74,7 +64,7 @@ describe("csv", () => {
                 areaType: 'nation',
                 areaCode: 'E92000001',
                 areaName: 'England',
-                newCasesByPublish: 92,
+                newCasesByPublishDate: 92,
                 femaleCases:  [
                     {"age":"55_to_59","rate":2517.1,"value":48502},
                     {"age":"20_to_24","rate":4088.8,"value":64919}
@@ -106,10 +96,14 @@ describe("csv", () => {
                 csv
                     .split("\n")[0]
                     .trim(),
-                Object.keys(resultsStructure)
+                Object.keys(mainResultsStructure)
                     .join(","),
             );
 
+            const arr = csv.split("\n").slice(1);
+            const max_response_date = Math.max(...arr.map((e: string) => new Date(e.split(",")[0]).getTime()))
+            const max_data_date = Math.max(...data.map(e => new Date(e.date).getTime()), 0);
+            assert.strictEqual (max_response_date <= max_data_date, true);
 
         });
 
@@ -214,6 +208,10 @@ describe("csv", () => {
                     .join(","),
             );
 
+            const arr = csv.split("\n").slice(1);
+            const max_response_date = Math.max(...arr.map((e: string) => new Date(e.split(",")[9]).getTime()))
+            const max_data_date = Math.max(...data.map(e => new Date(e.date).getTime()), 0);
+            assert.strictEqual (max_response_date <= max_data_date, true);
 
         });
 

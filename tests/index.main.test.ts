@@ -16,8 +16,6 @@ import {
 
 import type { GenericJson } from "../data/types";
 
-import { mainResultsStructure } from './vars';
-
 import httpTrigger from '../data/index';
 
 
@@ -25,7 +23,18 @@ describe("index main", () => {
 
     const releaseDate = "2020-11-20T00:00:00.000Z";
 
-    const metrics = "newCasesByPublish,femaleCases,maleCases";
+    const metrics = "newCasesByPublishDate,femaleCases,maleCases";
+
+    const resultsStructure: GenericJson = {
+        "date": "date",
+        "areaType": "areaType",
+        "areaCode": "areaCode",
+        "areaName": "areaName" ,
+        "metric": "metric",
+        "age": "age",
+        "value": "value",
+        "rate": "rate"
+    };
 
     const request: HttpRequest = {
 
@@ -72,84 +81,88 @@ describe("index main", () => {
 
 
     const apiMetrics: GenericJson = {
-        "newCasesByPublish": "newCasesByPublish",
-        "femaleCases": "femaleCases",
-        "maleCases": "maleCases"
+        "newCasesByPublishDate": "int",
+        "femaleCases": "list",
+        "maleCases": "list"
     };
 
-    it('getJSON integrity',  async () => {
+    describe('#httpTrigger', () => {
 
-        request["query"]["format"] = "json";
+        it('JSON integrity',  async () => {
 
-        const jsonData =  await httpTrigger(context, request, apiMetrics);
+            request["query"]["format"] = "json";
 
-        assert.strictEqual(typeof jsonData, "object");
-        assert.strictEqual("body" in jsonData, true);
-        assert.strictEqual("headers" in jsonData, true);
+            const jsonData =  await httpTrigger(context, request, apiMetrics);
 
-        const json = JSON.parse(jsonData.body);
-        assert.strictEqual("length" in json, true);
-        assert.strictEqual("body" in  json, true);
+            assert.strictEqual(typeof jsonData, "object");
+            assert.strictEqual("body" in jsonData, true);
+            assert.strictEqual("headers" in jsonData, true);
 
-        const max_data_date = new Date(Math.max(...json.body.map((e: GenericJson) => new Date(e.date))));
-        assert.strictEqual (max_data_date.getTime() <= new Date(releaseDate).getTime(), true);
+            const json = JSON.parse(jsonData.body);
+            assert.strictEqual("length" in json, true);
+            assert.strictEqual("body" in  json, true);
 
-        assert.strictEqual(json.length > 10, true);
-    });
+            const max_response_date = Math.max(...json.body.map((e: GenericJson) => new Date(e.date).getTime()));
+            assert.strictEqual (max_response_date <= new Date(releaseDate).getTime(), true);
 
-    it('getCSV integrity',  async () => {
+            assert.strictEqual(json.length > 10, true);
+        });
 
-      
-        request["query"]["format"] = "csv";
+        it('CSV integrity',  async () => {
 
-        const csvData =  await httpTrigger(context, request, apiMetrics);
-
-        assert.strictEqual(typeof csvData, "object");
-        assert.strictEqual("body" in csvData, true);
-        assert.strictEqual("headers" in csvData, true);
-        assert.strictEqual(typeof csvData.body, "string");
-
-        const arr = csvData.body.split("\n").slice(1);
-        const max_data_date = new Date(Math.max(...arr.map((e: string) => new Date(e.split(",")[0]))));
-
-        assert.strictEqual (max_data_date.getTime() <= new Date(releaseDate).getTime(), true);
-
-        assert.strictEqual(
-            csvData.body.split("\n").length > 10,
-            true
-        );
-
-        assert.strictEqual(
-            csvData
-                .body
-                .split("\n")[0]
-                .trim(),
-            Object.keys(mainResultsStructure)
-                .join(","),
-        );
-    });
-
-
-    it('JSONL integrity', async () => {
-
-        request["query"]["format"] = "jsonl";
         
-        const jsonlData =  await httpTrigger(context, request, apiMetrics);
+            request["query"]["format"] = "csv";
 
-        assert.strictEqual(typeof jsonlData, "object");
-        assert.strictEqual("body" in jsonlData, true);
-        assert.strictEqual("headers" in jsonlData, true);
-        assert.strictEqual(typeof jsonlData.body, "string");
+            const csvData =  await httpTrigger(context, request, apiMetrics);
 
-        assert.strictEqual(
-            jsonlData.body.split("\n").length > 10,
-            true
-        );
-           
-        const arr = jsonlData.body.split("\n").slice(1);
-        const max_data_date = new Date(Math.max(...arr.map((e: string) => new Date((JSON.parse(e)).date))));
+            assert.strictEqual(typeof csvData, "object");
+            assert.strictEqual("body" in csvData, true);
+            assert.strictEqual("headers" in csvData, true);
+            assert.strictEqual(typeof csvData.body, "string");
 
-        assert.strictEqual (max_data_date.getTime() <= new Date(releaseDate).getTime(), true);
+            const arr = csvData.body.split("\n").slice(1);
+            const max_response_date = Math.max(...arr.map((e: string) => new Date(e.split(",")[0]).getTime()));
+            assert.strictEqual (max_response_date <= new Date(releaseDate).getTime(), true);
+
+            assert.strictEqual(
+                csvData.body.split("\n").length > 10,
+                true
+            );
+
+            assert.strictEqual(
+                csvData
+                    .body
+                    .split("\n")[0]
+                    .trim(),
+                Object.keys(resultsStructure)
+                    .join(","),
+            );
+        });
+
+
+        it('JSONL integrity', async () => {
+
+            request["query"]["format"] = "jsonl";
+            
+            const jsonlData =  await httpTrigger(context, request, apiMetrics);
+
+            assert.strictEqual(typeof jsonlData, "object");
+            assert.strictEqual("body" in jsonlData, true);
+            assert.strictEqual("headers" in jsonlData, true);
+            assert.strictEqual(typeof jsonlData.body, "string");
+
+            assert.strictEqual(
+                jsonlData.body.split("\n").length > 10,
+                true
+            );
+            
+            const arr = jsonlData.body.split("\n").slice(1);
+            const max_respnse_date = Math.max(...arr.map((e: string) => new Date((JSON.parse(e)).date).getTime()));
+            assert.strictEqual (max_respnse_date <= new Date(releaseDate).getTime(), true);
+
+        });
 
     });
+
+
 });

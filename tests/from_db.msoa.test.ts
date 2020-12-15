@@ -98,7 +98,7 @@ describe("from_db msoa", () => {
         return data
     }
 
-    describe('#getData', () => {
+    describe('#GetData', () => {
 
         const container = new CosmosClient(vars.DB_CONNECTION)
                             .database(vars.DB_NAME)
@@ -118,11 +118,11 @@ describe("from_db msoa", () => {
             assert.strictEqual("body" in  json, true);
 
             assert.strictEqual(json.length > 10, true);
+
+            const max_response_date = Math.max(...json.body.map((e: GenericJson) => new Date(e.date).getTime()));
+            assert.strictEqual (max_response_date <= new Date(releaseDate).getTime(), true);
         });
 
-    });
-
-    describe('#getData', () => {
 
         it('CSV integrity', async () => {
 
@@ -148,11 +148,13 @@ describe("from_db msoa", () => {
         
             );
 
+            const arr = csvData.body.split("\n").slice(1);
+            const max_response_date = Math.max(...arr.map((e: string) => new Date(e.split(",")[9]).getTime()));
+            assert.strictEqual (max_response_date <= new Date(releaseDate).getTime(), true);
+
+
         });
 
-    });
-
-    describe('#getData', () => {
 
         it('JSONL integrity', async () => {
 
@@ -169,6 +171,10 @@ describe("from_db msoa", () => {
                 jsonlData.body.split("\n").length > 10,
                 true
             );
+
+            const arr = jsonlData.body.split("\n").slice(1);
+            const max_response_date = Math.max(...arr.map((e: string) => new Date((JSON.parse(e)).date).getTime()));
+            assert.strictEqual (max_response_date <= new Date(releaseDate).getTime(), true);
            
         });
 

@@ -11,8 +11,7 @@ import {
     executionContext,
     traceContext,
     bindingDefinition,
-    logger,
-    mainResultsStructure
+    logger
 } from './vars';
 
 
@@ -82,83 +81,90 @@ describe("index msoa", () => {
     const apiMetrics: GenericJson = {
     };
 
-    it('getJSON integrity',  async () => {
 
-        request["query"]["format"] = "json";
+    describe('#httpTrigger', () => {
 
-        const jsonData =  await httpTrigger(context, request, apiMetrics);
+        it('JSON integrity',  async () => {
 
-        assert.strictEqual(typeof jsonData, "object");
-        assert.strictEqual("body" in jsonData, true);
-        assert.strictEqual("headers" in jsonData, true);
+            request["query"]["format"] = "json";
 
-        const json = JSON.parse(jsonData.body);
+            const jsonData =  await httpTrigger(context, request, apiMetrics);
 
-        const max_data_date = new Date(Math.max(...json.body.map((e: GenericJson) => new Date(e.date))));
+            assert.strictEqual(typeof jsonData, "object");
+            assert.strictEqual("body" in jsonData, true);
+            assert.strictEqual("headers" in jsonData, true);
 
-        assert.strictEqual (max_data_date.getTime() <= new Date(releaseDate).getTime(), true);
+            const json = JSON.parse(jsonData.body);
 
-        assert.strictEqual("length" in json, true);
-        assert.strictEqual("body" in  json, true);
+            const max_response_date = Math.max(...json.body.map((e: GenericJson) => new Date(e.date).getTime()));
+            assert.strictEqual (max_response_date <= new Date(releaseDate).getTime(), true);
 
-        assert.strictEqual(json.length > 10, true);
+            assert.strictEqual("length" in json, true);
+            assert.strictEqual("body" in  json, true);
 
-
-    });
-
-    it('getCSV integrity',  async () => {
-
-      
-        request["query"]["format"] = "csv";
-
-        const csvData =  await httpTrigger(context, request, apiMetrics);
-
-        assert.strictEqual(typeof csvData, "object");
-        assert.strictEqual("body" in csvData, true);
-        assert.strictEqual("headers" in csvData, true);
-        assert.strictEqual(typeof csvData.body, "string");
-
-        const arr = csvData.body.split("\n").slice(1);
-        const max_data_date = new Date(Math.max(...arr.map((e: string) => new Date(e.split(",")[9]))));
-        assert.strictEqual (max_data_date.getTime() <= new Date(releaseDate).getTime(), true);
-
-        assert.strictEqual(
-            csvData.body.split("\n").length > 10,
-            true
-        );
-
-        assert.strictEqual(
-            csvData
-                .body
-                .split("\n")[0]
-                .trim(),
-            Object.keys(msoaResultsStructure)
-                .join(","),
-        );
-    });
+            assert.strictEqual(json.length > 10, true);
 
 
-    it('JSONL integrity', async () => {
+        });
+    
 
-        request["query"]["format"] = "jsonl";
+        it('CSV integrity',  async () => {
+
         
-        const jsonlData =  await httpTrigger(context, request, apiMetrics);
+            request["query"]["format"] = "csv";
 
-        assert.strictEqual(typeof jsonlData, "object");
-        assert.strictEqual("body" in jsonlData, true);
-        assert.strictEqual("headers" in jsonlData, true);
+            const csvData =  await httpTrigger(context, request, apiMetrics);
 
-        assert.strictEqual(typeof jsonlData.body, "string");
+            assert.strictEqual(typeof csvData, "object");
+            assert.strictEqual("body" in csvData, true);
+            assert.strictEqual("headers" in csvData, true);
+            assert.strictEqual(typeof csvData.body, "string");
+
+            const arr = csvData.body.split("\n").slice(1);
+            const max_response_date = Math.max(...arr.map((e: string) => new Date(e.split(",")[9]).getTime()));
+            assert.strictEqual (max_response_date <= new Date(releaseDate).getTime(), true);
+
+            assert.strictEqual(
+                csvData.body.split("\n").length > 10,
+                true
+            );
+
+            assert.strictEqual(
+                csvData
+                    .body
+                    .split("\n")[0]
+                    .trim(),
+                Object.keys(msoaResultsStructure)
+                    .join(","),
+            );
+        });
 
 
-        assert.strictEqual(
-            jsonlData.body.split("\n").length > 10,
-            true
-        );
-           
-        const arr = jsonlData.body.split("\n").slice(1);
-        const max_data_date = new Date(Math.max(...arr.map((e: string) => new Date((JSON.parse(e)).date))));
-        assert.strictEqual (max_data_date.getTime() <= new Date(releaseDate).getTime(), true)
+        it('JSONL integrity', async () => {
+
+            request["query"]["format"] = "jsonl";
+            
+            const jsonlData =  await httpTrigger(context, request, apiMetrics);
+
+            assert.strictEqual(typeof jsonlData, "object");
+            assert.strictEqual("body" in jsonlData, true);
+            assert.strictEqual("headers" in jsonlData, true);
+
+            assert.strictEqual(typeof jsonlData.body, "string");
+
+
+            assert.strictEqual(
+                jsonlData.body.split("\n").length > 10,
+                true
+            );
+            
+            const arr = jsonlData.body.split("\n").slice(1);
+            const max_response_date = Math.max(...arr.map((e: string) => new Date((JSON.parse(e)).date).getTime()));
+            assert.strictEqual (max_response_date <= new Date(releaseDate).getTime(), true)
+
+        });
 
     });
+
+
 });
