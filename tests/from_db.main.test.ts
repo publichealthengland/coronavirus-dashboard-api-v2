@@ -78,7 +78,7 @@ describe("from_db main", () => {
         const data =  await GetData(query, parameters, {
                                     container: container,
                                     partitionKey: releaseDate,
-                                    processor: processResults(format, nestedMetrics)
+                                    processor: processResults({ format, nestedMetrics, releaseDate })
         });
 
         return data
@@ -93,6 +93,7 @@ describe("from_db main", () => {
             assert.strictEqual(typeof jsonData, "object");
             assert.strictEqual("body" in jsonData, true);
             assert.strictEqual("headers" in jsonData, true);
+            assert.strictEqual("content-disposition" in jsonData.headers, true);
 
             const json = JSON.parse(jsonData.body);
             assert.strictEqual("length" in json, true);
@@ -112,6 +113,8 @@ describe("from_db main", () => {
             assert.strictEqual(typeof csvData, "object");
             assert.strictEqual("body" in csvData, true);
             assert.strictEqual("headers" in csvData, true);
+            assert.strictEqual("content-disposition" in csvData.headers, true);
+
             assert.strictEqual(typeof csvData.body, "string");
 
             const arr = csvData.body.split("\n").slice(1);
@@ -142,6 +145,7 @@ describe("from_db main", () => {
             assert.strictEqual(typeof jsonlData, "object");
             assert.strictEqual("body" in jsonlData, true);
             assert.strictEqual("headers" in jsonlData, true);
+            assert.strictEqual("content-disposition" in jsonlData.headers, true);
 
             assert.strictEqual(typeof jsonlData.body, "string");
 
