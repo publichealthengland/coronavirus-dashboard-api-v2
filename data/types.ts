@@ -36,3 +36,10 @@ export interface GetMainDataOptions {
     partitionKey?: string
     processor: (data: GenericDBResponse) => any
 }
+
+
+export interface ResultProcessor {
+    format: string
+    nestedMetrics?: string[]
+    releaseDate: string 
+}

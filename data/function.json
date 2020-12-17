@@ -18,6 +18,13 @@
             "connection": "DeploymentBlobStorage"
         },
         {
+            "name": "seriesDate",
+            "type": "blob",
+            "direction": "in",
+            "path": "pipeline/info/seriesDate",
+            "connection": "DeploymentBlobStorage"
+        },
+        {
             "type": "http",
             "direction": "out",
             "name": "$return"

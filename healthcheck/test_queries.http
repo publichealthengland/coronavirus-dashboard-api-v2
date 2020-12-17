@@ -1,0 +1,9 @@
+GET http://localhost:7071/api/v2/healthcheck
+Accept: application/json, text/csv, application/jsonl, application/xml
+Accept-Encoding: gzip, deflate
+
+###
+
+HEAD http://localhost:7071/api/v2/healthcheck
+Accept: application/json, text/csv, application/jsonl, application/xml
+Accept-Encoding: gzip, deflate
