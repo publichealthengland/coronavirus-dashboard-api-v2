@@ -36,11 +36,12 @@ describe("msoa_data", () => {
 
             queryParams["format"] = "json";
         
-            const jsonData =  await msoaQuery(queryParams);
+            const jsonData =  await msoaQuery(queryParams, releaseDate);
                       
             assert.strictEqual(typeof jsonData, "object");
             assert.strictEqual("body" in jsonData, true);
             assert.strictEqual("headers" in jsonData, true);
+            assert.strictEqual("content-disposition" in jsonData.headers, true)
 
             const json = JSON.parse(jsonData.body);
 
@@ -53,19 +54,16 @@ describe("msoa_data", () => {
 
         });
 
-    });
-
-    describe('#msoaQuery', () => {
-
         it('CSV integrity', async () => {
     
             queryParams["format"] = "csv";
         
-            const csvData =  await msoaQuery(queryParams);
+            const csvData =  await msoaQuery(queryParams, releaseDate);
                       
             assert.strictEqual(typeof csvData, "object");
             assert.strictEqual("body" in csvData, true);
             assert.strictEqual("headers" in csvData, true);
+            assert.strictEqual("content-disposition" in csvData.headers, true)
             assert.strictEqual(typeof csvData.body, "string");
 
             assert.strictEqual(
@@ -74,8 +72,8 @@ describe("msoa_data", () => {
             );
 
             const arr = csvData.body.split("\n").slice(1);
-            const max_data_date = new Date(Math.max(...arr.map((e: string) => new Date(e.split(",")[9]))));
-            assert.strictEqual (max_data_date.getTime() <= new Date(releaseDate).getTime(), true)
+            const max_response_date = new Date(Math.max(...arr.map((e: string) => new Date(e.split(",")[9]))));
+            assert.strictEqual (max_response_date.getTime() <= new Date(releaseDate).getTime(), true)
 
             assert.strictEqual(
                 csvData
@@ -88,19 +86,17 @@ describe("msoa_data", () => {
 
         });
 
-    });
-
-    describe('#msoaQuery', () => {
 
         it('JSONL integrity', async () => {
                 
             queryParams["format"] = "jsonl";
         
-            const jsonlData =  await msoaQuery(queryParams);
+            const jsonlData =  await msoaQuery(queryParams, releaseDate);
                       
             assert.strictEqual(typeof jsonlData, "object");
             assert.strictEqual("body" in jsonlData, true);
             assert.strictEqual("headers" in jsonlData, true);
+            assert.strictEqual("content-disposition" in jsonlData.headers, true)
             assert.strictEqual(typeof jsonlData.body, "string");
 
             assert.strictEqual(
@@ -109,8 +105,8 @@ describe("msoa_data", () => {
             );
 
             const arr = jsonlData.body.split("\n").slice(1);
-            const max_data_date = new Date(Math.max(...arr.map((e: string) => new Date((JSON.parse(e)).date))));
-            assert.strictEqual (max_data_date.getTime() <= new Date(releaseDate).getTime(), true);
+            const max_response_date = new Date(Math.max(...arr.map((e: string) => new Date((JSON.parse(e)).date))));
+            assert.strictEqual (max_response_date.getTime() <= new Date(releaseDate).getTime(), true);
         });
     });
 
