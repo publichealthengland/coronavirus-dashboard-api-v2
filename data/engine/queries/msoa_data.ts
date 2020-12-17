@@ -34,7 +34,7 @@ const msoaMetrics: GenericJson = {
 };
 
 
-export const msoaQuery = async (queryParams: QueryParamsType) => {
+export const msoaQuery = async (queryParams: QueryParamsType, releaseDate: string) => {
 
     // Query params
     const format        = queryParams.format;
@@ -87,7 +87,7 @@ export const msoaQuery = async (queryParams: QueryParamsType) => {
     
     return GetData(query, parameters, {
         container: container,
-        processor: processResults(format)
+        processor: processResults({ format, releaseDate })
     });
 
 };  // msoaQuery

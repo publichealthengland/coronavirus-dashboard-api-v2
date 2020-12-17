@@ -4,6 +4,7 @@ import { CosmosClient } from "@azure/cosmos";
 import * as vars from "./variables";
 
 import type { QueryParamsType, GenericJson } from "../../types";
+import { release } from "os";
 
 
 const container = new CosmosClient(vars.DB_CONNECTION)
@@ -58,7 +59,7 @@ export const mainDataQuery = async (queryParams: QueryParamsType, releasedMetric
     return GetData(query, parameters, {
         container: container,
         partitionKey: releaseDate,
-        processor: processResults(format, nestedMetrics)
+        processor: processResults({ format, nestedMetrics, releaseDate })
     });
 
 };  // mainDataQuery

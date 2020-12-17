@@ -1,15 +1,18 @@
 import toCsv from "../csv";
 
-import type { GenericDBResponse } from "../../types";
+import type { GenericDBResponse, ResultProcessor } from "../../types";
 
 
-const process = async ( data: GenericDBResponse, format: string, nestedMetrics: string[] ) => {
+const process = async ( data: GenericDBResponse, format: string, nestedMetrics: string[], releaseDate: string ) => {
+
+    const areaName = data?.[0]?.areaName;
 
     switch ( format ) {
         case "csv":
             return {
                 headers: {
-                    "Content-Type": "text/csv; charset=utf-8"
+                    "Content-Type": "text/csv; charset=utf-8",
+                    "content-disposition": `attachment; filename="${areaName}_${releaseDate}.csv"`
                 },
                 body: toCsv(data, nestedMetrics)
             };
@@ -17,7 +20,8 @@ const process = async ( data: GenericDBResponse, format: string, nestedMetrics: 
         case "jsonl":
             return {
                 headers: {
-                    "Content-Type": "application/vnd.PHE-COVID19.v2+jsonl; charset=utf-8"
+                    "Content-Type": "application/vnd.PHE-COVID19.v2+jsonl; charset=utf-8",
+                    "content-disposition": `attachment; filename="${areaName}_${releaseDate}.jsonl"`
                 },
                 body: data.map(item => JSON.stringify(item)).join("\n")
             };
@@ -25,7 +29,8 @@ const process = async ( data: GenericDBResponse, format: string, nestedMetrics: 
         default:
             return {
                 headers: {
-                    "Content-Type": "application/vnd.PHE-COVID19.v2+json; charset=utf-8"
+                    "Content-Type": "application/vnd.PHE-COVID19.v2+json; charset=utf-8",
+                    "content-disposition": `attachment; filename="${areaName}_${releaseDate}.${format}"`
                 },
                 body: JSON.stringify({
                     length: data.length,
@@ -37,9 +42,9 @@ const process = async ( data: GenericDBResponse, format: string, nestedMetrics: 
 };  // process
 
 
-const processResults = ( format: string, nestedMetrics: string[] = []) => {
+const processResults = ({ format, nestedMetrics=[], releaseDate }: ResultProcessor) => {
 
-    return (data: GenericDBResponse) => process(data, format, nestedMetrics);
+    return (data: GenericDBResponse) => process(data, format, nestedMetrics, releaseDate);
 
 };  // processResults
 
