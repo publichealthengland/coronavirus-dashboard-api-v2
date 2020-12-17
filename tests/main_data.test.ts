@@ -47,6 +47,7 @@ describe("main_data", () => {
             assert.strictEqual(typeof jsonData, "object");
             assert.strictEqual("body" in jsonData, true);
             assert.strictEqual("headers" in jsonData, true);
+            assert.strictEqual("content-disposition" in jsonData.headers, true)
 
             const json = JSON.parse(jsonData.body);
             assert.strictEqual("length" in json, true);
@@ -59,9 +60,6 @@ describe("main_data", () => {
 
         });
 
-    });
-
-    describe('#mainDataQuery', () => {
 
         it('CSV integrity', async () => {
 
@@ -72,6 +70,7 @@ describe("main_data", () => {
             assert.strictEqual(typeof csvData, "object");
             assert.strictEqual("body" in csvData, true);
             assert.strictEqual("headers" in csvData, true);
+            assert.strictEqual("content-disposition" in csvData.headers, true)
             assert.strictEqual(typeof csvData.body, "string");
 
             const arr = csvData.body.split("\n").slice(1);
@@ -94,10 +93,6 @@ describe("main_data", () => {
 
         });
 
-    });
-
-    describe('#mainDataQuery', () => {
-
         
         it('JSONL integrity', async () => {
 
@@ -108,7 +103,7 @@ describe("main_data", () => {
             assert.strictEqual(typeof jsonlData, "object");
             assert.strictEqual("body" in jsonlData, true);
             assert.strictEqual("headers" in jsonlData, true);
-
+            assert.strictEqual("content-disposition" in jsonlData.headers, true);
             assert.strictEqual(typeof jsonlData.body, "string");
 
             assert.strictEqual(
