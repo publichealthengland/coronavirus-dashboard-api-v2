@@ -2,16 +2,19 @@ import { describe, it } from "mocha";
 
 import assert from "assert";
 
-import type { GenericDBResponse, GenericJson } from "../data/types";
+import type { GenericDBResponse, GenericJson, ResultProcessor } from "../data/types";
 
 import { mainResultsStructure } from './vars';
 
 import processResults from "../data/processor";
+import { relative } from "path";
 
 
 describe("result", () => {
 
     describe('#processResults', () => {
+
+        const releaseDate = "2020-11-20";
 
         const nestedMetrics: string[] = [
             "maleCases", 
@@ -81,13 +84,20 @@ describe("result", () => {
             }
         ];
 
+        const params = {
+            format: "json",
+            nestedMetrics: nestedMetrics,
+            releaseDate: releaseDate
+        } as ResultProcessor
 
         it('JSON integrity', async () => {
-            const jsonData = await processResults("json", nestedMetrics )(data as GenericDBResponse);
+            
+            const jsonData = await processResults( params )(data as GenericDBResponse);
 
             assert.strictEqual(typeof jsonData, "object");
             assert.strictEqual("body" in jsonData, true);
             assert.strictEqual("headers" in jsonData, true);
+            assert.strictEqual("content-disposition" in jsonData.headers, true)
     
             const json = JSON.parse(jsonData.body);
             assert.strictEqual("length" in json, true);
@@ -102,11 +112,15 @@ describe("result", () => {
         });
 
         it('CSV integrity', async () => {
-            const csvData = await processResults("csv", nestedMetrics )(data as GenericDBResponse);
+
+            params["format"] = "csv";
+
+            const csvData = await processResults( params )(data as GenericDBResponse);
 
             assert.strictEqual(typeof csvData, "object");
             assert.strictEqual("body" in csvData, true);
             assert.strictEqual("headers" in csvData, true);
+            assert.strictEqual("content-disposition" in csvData.headers, true)
            
             assert.strictEqual(
                 csvData.body.split("\n").length > data.length + 1,
@@ -130,11 +144,15 @@ describe("result", () => {
         });
 
         it('JSONL integrity', async () => {
-            const jsonlData = await processResults("jsonl", nestedMetrics )(data as GenericDBResponse);
+
+            params["format"] = "jsonl";
+
+            const jsonlData = await processResults( params )(data as GenericDBResponse);
 
             assert.strictEqual(typeof jsonlData, "object");
             assert.strictEqual("body" in jsonlData, true);
             assert.strictEqual("headers" in jsonlData, true);
+            assert.strictEqual("content-disposition" in jsonlData.headers, true)
 
             assert.strictEqual(typeof jsonlData.body, "string");
 
