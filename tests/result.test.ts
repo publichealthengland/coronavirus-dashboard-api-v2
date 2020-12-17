@@ -7,7 +7,6 @@ import type { GenericDBResponse, GenericJson, ResultProcessor } from "../data/ty
 import { mainResultsStructure } from './vars';
 
 import processResults from "../data/processor";
-import { relative } from "path";
 
 
 describe("result", () => {
@@ -97,7 +96,7 @@ describe("result", () => {
             assert.strictEqual(typeof jsonData, "object");
             assert.strictEqual("body" in jsonData, true);
             assert.strictEqual("headers" in jsonData, true);
-            assert.strictEqual("content-disposition" in jsonData.headers, true)
+            assert.strictEqual("content-disposition" in jsonData.headers, true);
     
             const json = JSON.parse(jsonData.body);
             assert.strictEqual("length" in json, true);
@@ -120,7 +119,7 @@ describe("result", () => {
             assert.strictEqual(typeof csvData, "object");
             assert.strictEqual("body" in csvData, true);
             assert.strictEqual("headers" in csvData, true);
-            assert.strictEqual("content-disposition" in csvData.headers, true)
+            assert.strictEqual("content-disposition" in csvData.headers, true);
            
             assert.strictEqual(
                 csvData.body.split("\n").length > data.length + 1,
@@ -152,7 +151,7 @@ describe("result", () => {
             assert.strictEqual(typeof jsonlData, "object");
             assert.strictEqual("body" in jsonlData, true);
             assert.strictEqual("headers" in jsonlData, true);
-            assert.strictEqual("content-disposition" in jsonlData.headers, true)
+            assert.strictEqual("content-disposition" in jsonlData.headers, true);
 
             assert.strictEqual(typeof jsonlData.body, "string");
 

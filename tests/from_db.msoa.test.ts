@@ -7,8 +7,6 @@ import processResults from "../data/processor";
 
 import * as vars from "../data/engine/queries/variables";
 
-import { msoaResultsStructure } from './vars';
-
 import moment from "moment";
 
 import { GetData } from '../data/engine/database';

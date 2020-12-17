@@ -7,7 +7,6 @@ import type { GenericDBResponse, GenericJson } from "../data/types";
 import { mainResultsStructure, msoaResultsStructure } from './vars';
 
 import toCSV from '../data/processor/csv';
-import { generateKeyPair } from "crypto";
 
 describe("csv", () => {
 
@@ -83,7 +82,7 @@ describe("csv", () => {
 
         it('CSV integrity',  () => {
     
-            const csv =  toCSV(data as GenericDBResponse, nestedMetrics)
+            const csv =  toCSV(data as GenericDBResponse, nestedMetrics);
 
             assert.strictEqual(typeof csv, "string");
            
