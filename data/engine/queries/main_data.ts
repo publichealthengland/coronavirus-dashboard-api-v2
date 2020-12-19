@@ -3,7 +3,8 @@ import processResults from "../../processor";
 import { CosmosClient } from "@azure/cosmos";
 import * as vars from "./variables";
 
-import type { QueryParamsType, GenericJson } from "../../types";
+import type { QueryParamsType, GenericJson, AreaInfo } from "../../types";
+import { getAreaInfo } from "./lookup";
 
 
 const container = new CosmosClient(vars.DB_CONNECTION)
@@ -54,11 +55,18 @@ export const mainDataQuery = async (queryParams: QueryParamsType, releasedMetric
                    FROM c
                    WHERE ${queryFilters}
                    ORDER BY c.areaType ASC, c.areaCode ASC, c.date DESC`;
+
+    const area = getAreaInfo(areaType, areaCode);
     
     return GetData(query, parameters, {
         container: container,
         partitionKey: releaseDate,
-        processor: processResults({ format, nestedMetrics, releaseDate })
+        processor: processResults({
+            format, 
+            nestedMetrics, 
+            releaseDate,
+            area: await area as unknown as AreaInfo
+        }),
     });
 
 };  // mainDataQuery
