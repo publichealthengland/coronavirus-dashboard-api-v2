@@ -4,7 +4,6 @@ import { CosmosClient } from "@azure/cosmos";
 import * as vars from "./variables";
 
 import type { QueryParamsType, GenericJson } from "../../types";
-import { release } from "os";
 
 
 const container = new CosmosClient(vars.DB_CONNECTION)
