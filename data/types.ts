@@ -1,4 +1,4 @@
-import {Container} from "@azure/cosmos";
+import { Container } from "@azure/cosmos";
 
 export interface GenericJson {
     [key: string]: string
@@ -11,7 +11,7 @@ export interface DBObject {
 
 
 export interface DBResponseItem {
-    [key: string]: DBObject[] | DBObject 
+    [key: string]: DBObject[] | DBObject | string | number | boolean | null
 }
 
 
@@ -31,6 +31,13 @@ export interface QueryParamsType extends GenericJson {
 }
 
 
+export interface AreaInfo {
+    areaName:  string | null
+    areaType:  string
+    areaCode?: string
+}
+
+
 export interface GetMainDataOptions {
     container: Container
     partitionKey?: string
@@ -40,6 +47,7 @@ export interface GetMainDataOptions {
 
 export interface ResultProcessor {
     format: string
+    releaseDate: string,
+    area: AreaInfo,
     nestedMetrics?: string[]
-    releaseDate: string 
 }
