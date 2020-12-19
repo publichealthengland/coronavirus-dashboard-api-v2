@@ -87,7 +87,15 @@ export const msoaQuery = async (queryParams: QueryParamsType, releaseDate: strin
     
     return GetData(query, parameters, {
         container: container,
-        processor: processResults({ format, releaseDate })
+        processor: processResults({ 
+            format: format, 
+            releaseDate: releaseDate,
+            area: {
+                areaType: areaType,
+                areaName: null,
+                areaCode: areaCode
+            }
+        })
     });
 
 };  // msoaQuery
