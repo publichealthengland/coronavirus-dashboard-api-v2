@@ -18,9 +18,9 @@ const prepareMetricName = ( metric: string ): string => {
 
         case "alertLevel":
             return `'${metric}':      (c.alertLevel ?? null),
-                    '${metric}Name':  (udf.processAlertLevel(c, "value") ?? null),
-                    '${metric}Url':   (udf.processAlertLevel(c, "url") ?? null),
-                    '${metric}Value': (udf.processAlertLevel(c, "level") ?? null)`;
+                    '${metric}Name':  alertLevel['value'],
+                    '${metric}Url':   alertLevel['url'],
+                    '${metric}Value': alertLevel['level']`;
 
         default:
             return `'${metric}': (c.${ metric } ?? null)`;
@@ -28,6 +28,24 @@ const prepareMetricName = ( metric: string ): string => {
     }
 
 };  // prepareMetricName
+
+
+const joinMetricQuery = ( metric: string ): string => {
+
+    switch ( metric ) {
+
+        case "alertLevel":
+            return `SELECT VALUE udf.processAlertLevel({
+                'date':       c.date, 
+                'alertLevel': c.alertLevel,
+                'areaCode':   c.areaCode
+            })`;
+
+    }
+
+    return "";
+
+};  // joinMetricQuery
 
 
 export const mainDataQuery = async (queryParams: QueryParamsType, releasedMetrics: GenericJson) => {
@@ -39,6 +57,7 @@ export const mainDataQuery = async (queryParams: QueryParamsType, releasedMetric
     const releaseDate   = queryParams.release.split(/T/)[0];
     const rawMetrics    = queryParams.metric.split(/,/).filter(metric => metric in releasedMetrics);
     const nestedMetrics = rawMetrics.filter(metric => releasedMetrics[metric] === "list");
+    const jsonMetrics   = rawMetrics.filter(metric => releasedMetrics[metric] === "dict");
 
     // DB Query params
     const parameters = [
@@ -50,13 +69,32 @@ export const mainDataQuery = async (queryParams: QueryParamsType, releasedMetric
 
     let queryFilters = "c.areaType = @areaType";
 
+    const existenceFilters = [];
+    const joinQueries = [];
+
+    for ( const metric of rawMetrics ) {
+
+        existenceFilters.push(`IS_DEFINED(c.${metric})`);
+
+        // Join query for nested metric - must be handled as a ``case`` 
+        // in the ``joinMetricQuery`` func. 
+        if ( jsonMetrics.indexOf(metric) > -1 ) {
+
+            joinQueries.push(`JOIN (${ joinMetricQuery(metric) }) AS ${ metric }`);
+
+        }
+
+    }
+
     if ( areaCode ) {
+
         queryFilters += " AND c.areaCode = @areaCode";
 
         parameters.push({
             name: "@areaCode",
             value: areaCode
         });
+
     }
 
     // Process metrics
@@ -71,8 +109,9 @@ export const mainDataQuery = async (queryParams: QueryParamsType, releasedMetric
     // Final query
     const query = `SELECT VALUE {${ metrics }}
                    FROM c
-                   WHERE ${ queryFilters }
-                   ORDER BY c.areaType ASC, c.areaCode ASC, c.date DESC`;
+                   ${ joinQueries.join("\n") }
+                   WHERE ${ queryFilters } AND (${ existenceFilters.join(" OR ") })
+                   `;
 
     const area = getAreaInfo(areaType, areaCode);
     
