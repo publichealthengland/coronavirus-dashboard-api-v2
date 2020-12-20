@@ -16,3 +16,8 @@ Accept-Encoding: gzip, deflate
 GET http://localhost:7071/api/v2/data?areaType=nhsTrust&areaCode=RLT&metric=cumAdmissions&release=2020-11-20T16:53:34.0092775Z&format=csv
 Accept: application/json, text/csv, application/jsonl, application/xml
 Accept-Encoding: gzip, deflate
+
+###
+GET http://localhost:7071/api/v2/data?areaType=nation&metric=alertLevel&release=2020-11-20T16:53:34.0092775Z&format=csv
+Accept: application/json, text/csv, application/jsonl, application/xml
+Accept-Encoding: gzip, deflate
