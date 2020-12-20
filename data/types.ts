@@ -47,7 +47,7 @@ export interface GetMainDataOptions {
 
 export interface ResultProcessor {
     format: string
-    releaseDate: string,
-    area: AreaInfo,
+    releaseDate: string
+    area: AreaInfo
     nestedMetrics?: string[]
 }
