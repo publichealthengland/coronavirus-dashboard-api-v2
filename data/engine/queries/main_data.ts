@@ -12,6 +12,21 @@ const container = new CosmosClient(vars.DB_CONNECTION)
                 .container(vars.PUBLIC_DATA);
 
 
+const prepareMetricName = ( metric: string ): string => {
+
+    switch ( metric ) {
+
+        case "alertLevel":
+            return `udf.processAlertLevel(c.${ metric })`;
+
+        default:
+            return `c.${ metric }`;
+
+    }
+
+};  // prepareMetricName
+
+
 export const mainDataQuery = async (queryParams: QueryParamsType, releasedMetrics: GenericJson) => {
 
     // Query params
@@ -47,13 +62,15 @@ export const mainDataQuery = async (queryParams: QueryParamsType, releasedMetric
         "'areaType': c.areaType",
         "'areaCode': c.areaCode",
         "'areaName': c.areaName",
-        ...rawMetrics.map(metric => `'${metric}': c.${metric} ?? null`)
+        ...rawMetrics.map(metric => 
+            `'${ metric }': ${ prepareMetricName(metric) } ?? null`
+        )
     ].join(", ");
 
     // Final query
-    const query = `SELECT VALUE {${metrics}}
+    const query = `SELECT VALUE {${ metrics }}
                    FROM c
-                   WHERE ${queryFilters}
+                   WHERE ${ queryFilters }
                    ORDER BY c.areaType ASC, c.areaCode ASC, c.date DESC`;
 
     const area = getAreaInfo(areaType, areaCode);
