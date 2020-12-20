@@ -17,10 +17,13 @@ const prepareMetricName = ( metric: string ): string => {
     switch ( metric ) {
 
         case "alertLevel":
-            return `udf.processAlertLevel(c.${ metric })`;
+            return `'${metric}':      (c.alertLevel ?? null),
+                    '${metric}Name':  (udf.processAlertLevel(c, "value") ?? null),
+                    '${metric}Url':   (udf.processAlertLevel(c, "url") ?? null),
+                    '${metric}Value': (udf.processAlertLevel(c, "level") ?? null)`;
 
         default:
-            return `c.${ metric }`;
+            return `'${metric}': (c.${ metric } ?? null)`;
 
     }
 
@@ -62,9 +65,7 @@ export const mainDataQuery = async (queryParams: QueryParamsType, releasedMetric
         "'areaType': c.areaType",
         "'areaCode': c.areaCode",
         "'areaName': c.areaName",
-        ...rawMetrics.map(metric => 
-            `'${ metric }': ${ prepareMetricName(metric) } ?? null`
-        )
+        ...rawMetrics.map(prepareMetricName)
     ].join(", ");
 
     // Final query
