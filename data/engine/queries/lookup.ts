@@ -1,4 +1,3 @@
-import { GetData } from "../database";
 import { CosmosClient } from "@azure/cosmos";
 import * as vars from "./variables";
 
