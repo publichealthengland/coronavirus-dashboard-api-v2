@@ -51,9 +51,11 @@ const joinMetricQuery = ( metric: string ): string => {
 export const mainDataQuery = async (queryParams: QueryParamsType, releasedMetrics: GenericJson) => {
 
     // Query params
-    const format        = queryParams.format;
-    const areaCode      = queryParams?.areaCode ?? "";
-    const areaType      = queryParams.areaType;
+    const { 
+        format, 
+        areaType, 
+        areaCode = "", 
+    }  = queryParams;
     const releaseDate   = queryParams.release.split(/T/)[0];
     const rawMetrics    = queryParams.metric.split(/,/).filter(metric => metric in releasedMetrics);
     const nestedMetrics = rawMetrics.filter(metric => releasedMetrics[metric] === "list");
@@ -64,6 +66,10 @@ export const mainDataQuery = async (queryParams: QueryParamsType, releasedMetric
         {
             name: "@areaType", 
             value: areaType
+        },
+        {
+            name: "@seriesDate",
+            value: releaseDate
         }
     ];
 
@@ -110,8 +116,14 @@ export const mainDataQuery = async (queryParams: QueryParamsType, releasedMetric
     const query = `SELECT VALUE {${ metrics }}
                    FROM c
                    ${ joinQueries.join("\n") }
-                   WHERE ${ queryFilters } AND (${ existenceFilters.join(" OR ") })
+                   WHERE 
+                        c.seriesDate = @seriesDate
+                    AND ${ queryFilters } 
+                    AND (${ existenceFilters.join(" OR ") })
                    `;
+
+    console.info(query);
+    console.info(parameters);
 
     const area = getAreaInfo(areaType, areaCode);
     
