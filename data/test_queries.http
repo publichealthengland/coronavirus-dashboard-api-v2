@@ -18,6 +18,11 @@ Accept: application/json, text/csv, application/jsonl, application/xml
 Accept-Encoding: gzip, deflate
 
 ###
-GET http://localhost:7071/api/v2/data?areaType=ltla&areaCode=E09000014&metric=alertLevel&release=2020-12-19T15:34:20.8082385Z&format=csv
+GET http://localhost:7071/api/v2/data?areaType=ltla&metric=alertLevel&release=2020-12-19T15:34:20.8082385Z&format=csv
+Accept: application/json, text/csv, application/jsonl, application/xml
+Accept-Encoding: gzip, deflate
+
+### EMPTY RESPONSE
+GET http://localhost:7071/api/v2/data?areaType=overview&metric=alertLevel&release=2020-12-19T15:34:20.8082385Z&format=jsonl
 Accept: application/json, text/csv, application/jsonl, application/xml
 Accept-Encoding: gzip, deflate
