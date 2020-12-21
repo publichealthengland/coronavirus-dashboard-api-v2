@@ -1,6 +1,6 @@
 {
     "name": "coronavirus-api-batch",
-    "version": "2.3.0",
+    "version": "2.3.1",
     "description": "",
     "scripts": {
         "build": "tsc",
