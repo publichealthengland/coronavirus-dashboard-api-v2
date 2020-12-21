@@ -73,6 +73,8 @@ const flatten = ( doc: DBResponseItem ): any[] => {
 
 const toCsv = (docs: GenericDBResponse, nestedMetrics: string[]) => {
 
+    if ( !docs?.length ) return null;
+
     const flattenedDocs = 
         nestedMetrics.length > 0
             ? docs.map(flatten).reduce((acc, item) => [...acc, ...item], [])
