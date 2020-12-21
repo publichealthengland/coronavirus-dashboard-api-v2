@@ -11,7 +11,18 @@ const process = async ( data: GenericDBResponse, format: string, nestedMetrics: 
         areaName = data[0].areaName as string
     }
     
-    const fileName = `${areaName ? areaName : areaType}_${releaseDate}.${format}`
+    const fileName = `${areaName ? areaName : areaType}_${releaseDate}.${format}`;
+
+    if ( !data?.length ) {
+        return {
+            headers: {
+                "Content-Type": "text/csv; charset=utf-8",
+                "content-disposition": `attachment; filename="${fileName}"`
+            },
+            body: null,
+            statusCode: 204
+        };
+    }
 
     switch ( format ) {
         case "csv":
