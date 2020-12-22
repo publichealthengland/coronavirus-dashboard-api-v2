@@ -122,9 +122,6 @@ export const mainDataQuery = async (queryParams: QueryParamsType, releasedMetric
                     AND (${ existenceFilters.join(" OR ") })
                    `;
 
-    options.context.log.info(query);
-    options.context.log.info(parameters);
-
     const area = getAreaInfo(areaType, areaCode);
     
     return GetData(query, parameters, {

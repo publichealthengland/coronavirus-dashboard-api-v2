@@ -7,7 +7,7 @@ import {
 
 import type { SqlParameter } from "@azure/cosmos";
 import { GetMainDataOptions } from "../../types";
-
+import { parseTraceParentId } from "../../common/utils";
 
 aiSetup();
 
@@ -21,9 +21,17 @@ aiSetup();
  */
 export const GetData = async ( query: string,  parameters: SqlParameter[], options: GetMainDataOptions) => {    
 
+    const { operationId, parentId, roleName } = parseTraceParentId(
+        options.requestOptions.context.traceContext.traceparent as string
+    );
+
+
     const operationIdOverride = {
-        "ai.operation.id": options.requestOptions.context.traceContext.traceparent as string
+        "ai.operation.id": operationId,
+        "ai.operation.parentId": parentId,
+        "ai.cloud.role": roleName
     };
+
 
     const start = new Date().getMilliseconds();
     let end;
@@ -46,7 +54,7 @@ export const GetData = async ( query: string,  parameters: SqlParameter[], optio
         return options.processor(results)
 
     } 
-    catch (err) {
+    catch ( err ) {
 
         success = false;
 
@@ -65,7 +73,7 @@ export const GetData = async ( query: string,  parameters: SqlParameter[], optio
             resultCode:0, 
             success: success, 
             dependencyTypeName: "Azure DocumentDB", 
-            tagOverrides:operationIdOverride
+            tagOverrides: operationIdOverride
         });
 
     }

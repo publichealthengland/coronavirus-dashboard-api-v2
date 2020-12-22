@@ -59,3 +59,9 @@ export interface ResultProcessor {
     nestedMetrics?: string[]
     requestOptions?: RequestOptions
 }
+
+export interface TraceFamilyIds {
+    operationId: string
+    parentId: string
+    roleName: string
+}
