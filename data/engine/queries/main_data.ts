@@ -3,7 +3,7 @@ import processResults from "../../processor";
 import { CosmosClient } from "@azure/cosmos";
 import * as vars from "./variables";
 
-import type { QueryParamsType, GenericJson, AreaInfo } from "../../types";
+import type { QueryParamsType, GenericJson, AreaInfo, RequestOptions } from "../../types";
 import { getAreaInfo } from "./lookup";
 
 
@@ -48,7 +48,7 @@ const joinMetricQuery = ( metric: string ): string => {
 };  // joinMetricQuery
 
 
-export const mainDataQuery = async (queryParams: QueryParamsType, releasedMetrics: GenericJson) => {
+export const mainDataQuery = async (queryParams: QueryParamsType, releasedMetrics: GenericJson, options: RequestOptions) => {
 
     // Query params
     const { 
@@ -122,14 +122,15 @@ export const mainDataQuery = async (queryParams: QueryParamsType, releasedMetric
                     AND (${ existenceFilters.join(" OR ") })
                    `;
 
-    console.info(query);
-    console.info(parameters);
+    options.context.log.info(query);
+    options.context.log.info(parameters);
 
     const area = getAreaInfo(areaType, areaCode);
     
     return GetData(query, parameters, {
         container: container,
         partitionKey: releaseDate,
+        requestOptions: options,
         processor: processResults({
             format, 
             nestedMetrics, 

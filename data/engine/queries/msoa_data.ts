@@ -3,8 +3,7 @@ import { CosmosClient } from "@azure/cosmos";
 import processResults from "../../processor";
 import * as vars from "./variables";
 
-import type { QueryParamsType, GenericJson } from "../../types";
-
+import type { QueryParamsType, GenericJson, RequestOptions } from "../../types";
 
 const container = new CosmosClient(vars.DB_CONNECTION)
                 .database(vars.DB_NAME)
@@ -34,7 +33,7 @@ const msoaMetrics: GenericJson = {
 };
 
 
-export const msoaQuery = async (queryParams: QueryParamsType, releaseDate: string) => {
+export const msoaQuery = async (queryParams: QueryParamsType, releaseDate: string, options: RequestOptions) => {
 
     // Query params
     const format        = queryParams.format;
@@ -83,10 +82,11 @@ export const msoaQuery = async (queryParams: QueryParamsType, releaseDate: strin
     const query = `SELECT VALUE {${metrics.join(", ")}}
                    FROM c
                    JOIN cases IN c.newCasesBySpecimenDate
-                   WHERE ${queryFilters}`;
+                   WHERE ${queryFilters}`;          
     
     return GetData(query, parameters, {
         container: container,
+        requestOptions: options,
         processor: processResults({ 
             format: format, 
             releaseDate: releaseDate,

@@ -1,4 +1,5 @@
 import { Container } from "@azure/cosmos";
+import { Context, HttpRequest } from "@azure/functions";
 
 export interface GenericJson {
     [key: string]: string
@@ -38,10 +39,16 @@ export interface AreaInfo {
 }
 
 
+export interface RequestOptions {
+    context: Context
+    request: HttpRequest 
+}
+
 export interface GetMainDataOptions {
     container: Container
     partitionKey?: string
     processor: (data: GenericDBResponse) => any
+    requestOptions: RequestOptions
 }
 
 
@@ -50,4 +57,5 @@ export interface ResultProcessor {
     releaseDate: string
     area: AreaInfo
     nestedMetrics?: string[]
+    requestOptions?: RequestOptions
 }
