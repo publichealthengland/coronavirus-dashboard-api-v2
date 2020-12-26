@@ -49,9 +49,7 @@ export const GetData = async ( query: string,  parameters: SqlParameter[], optio
                 }
             ).fetchAll();
 
-        success = true;
-
-        return options.processor(results)
+        return options.processor(results);
 
     } 
     catch ( err ) {
