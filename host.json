@@ -1,44 +1,44 @@
 {
-  "version": "2.0",
-  "functionTimeout": "00:30:00",
-  "extensionBundle": {
-    "id": "Microsoft.Azure.Functions.ExtensionBundle",
-    "version": "[1.*, 2.0.0)"
-  },
-  "aggregator": {
-    "batchSize": 1000,
-    "flushTimeout": "00:00:30"
-  },
-  "healthMonitor": {
-    "enabled": true,
-    "healthCheckInterval": "00:00:10",
-    "healthCheckWindow": "00:00:30",
-    "healthCheckThreshold": 5,
-    "counterThreshold": 0.70
-  },
-  "extensions": {
-    "cosmosDB": {
-      "connectionMode": "Gateway",
-      "protocol": "Https"
+    "version": "2.0",
+    "functionTimeout": "00:30:00",
+    "extensionBundle": {
+        "id": "Microsoft.Azure.Functions.ExtensionBundle",
+        "version": "[1.*, 2.0.0)"
     },
-    "http": {
-      "routePrefix": "api",
-      "dynamicThrottlesEnabled": true,
-      "maxOutstandingRequests": 150,
-      "maxConcurrentRequests": 150,
-      "customHeaders": {
-        "Cache-Control": "public, max-age=90",
-        "Strict-Transport-Security": "max-age=31536000; includeSubdomains; preload",
-        "x-frame-options": "deny",
-        "x-content-type-options": "nosniff",
-        "x-xss-protection": "1; mode=block",
-        "referrer-policy": "origin-when-cross-origin, strict-origin-when-cross-origin",
-        "content-security-policy": "default-src 'none'; style-src 'self' 'unsafe-inline'",
-        "x-phe-media-type": "PHE-COVID19.v2"
-      }
-    }
-  },
-  "logging": {
+    "aggregator": {
+        "batchSize": 1000,
+        "flushTimeout": "00:00:30"
+    },
+    "healthMonitor": {
+        "enabled": true,
+        "healthCheckInterval": "00:00:10",
+        "healthCheckWindow": "00:00:30",
+        "healthCheckThreshold": 5,
+        "counterThreshold": 0.70
+    },
+    "extensions": {
+        "cosmosDB": {
+            "connectionMode": "Gateway",
+            "protocol": "Https"
+        },
+        "http": {
+            "routePrefix": "api",
+            "dynamicThrottlesEnabled": true,
+            "maxOutstandingRequests": 150,
+            "maxConcurrentRequests": 150,
+            "customHeaders": {
+                "Cache-Control": "public, max-age=90",
+                "Strict-Transport-Security": "max-age=31536000; includeSubdomains; preload",
+                "x-frame-options": "deny",
+                "x-content-type-options": "nosniff",
+                "x-xss-protection": "1; mode=block",
+                "referrer-policy": "origin-when-cross-origin, strict-origin-when-cross-origin",
+                "content-security-policy": "default-src 'none'; style-src 'self' 'unsafe-inline'",
+                "x-phe-media-type": "PHE-COVID19.v2"
+            }
+        }
+    },
+    "logging": {
         "logLevel": {
             "default": "Information",
             "Host.Results": "Information",
@@ -56,8 +56,8 @@
                 "minSamplingPercentage": 0.1,
                 "maxSamplingPercentage": 100.0,
                 "movingAverageRatio": 1.0,
-                "excludedTypes": "Dependency",
-                "includedTypes": "PageView;Trace;Event;Request"
+                "excludedTypes": "",
+                "includedTypes": "PageView;Trace;Event;Request;Dependency"
             }
         },
         "enableLiveMetrics": true,
