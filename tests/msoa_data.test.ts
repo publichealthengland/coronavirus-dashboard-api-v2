@@ -2,13 +2,26 @@ import { describe, it } from "mocha";
 
 import assert from "assert";
 
-import type { QueryParamsType, GenericJson } from "../data/types";
+import type { QueryParamsType, GenericJson, RequestOptions } from "../data/types";
 
 import { msoaQuery } from '../data/engine';
 
 import { msoaResultsStructure } from './vars';
 
 import moment from 'moment';
+
+import { 
+    Context, 
+    HttpRequest
+} from "@azure/functions";
+
+import {
+    executionContext,
+    traceContext,
+    bindingDefinition,
+    logger
+} from './vars';
+
 
 describe("msoa_data", () => {
 
@@ -20,6 +33,54 @@ describe("msoa_data", () => {
 
     let today = new Date ();
     const releaseDate =  moment(today.setDate(today.getDate()-1)).format( "YYYY-MM-DD");
+
+    const request: HttpRequest = {
+
+        method: "GET",
+        url: "http://localhost:7001",
+        headers: {},
+        query: {
+            areaType: "nation",
+            areaCode: "E92000001",
+            release: releaseDate,
+            metric: metrics,
+            format: "json"
+        },
+        params: {},        
+        body: null,
+        rawBody: null
+    
+    };
+    
+    const context: Context = {
+    
+        invocationId: "id",
+    
+        executionContext: executionContext,
+    
+        bindings: {},
+    
+        bindingData: {},
+    
+        traceContext: traceContext,
+    
+        bindingDefinitions: bindingDefinition,
+    
+        log: logger,
+    
+        
+        done: () => {},
+        
+        req: request,
+        
+        res: {}
+       
+    };
+
+    const options: RequestOptions = {
+        context: context,
+        request: request
+    };
     
     const queryParams: QueryParamsType = {
         areaType: "msoa",
@@ -36,7 +97,7 @@ describe("msoa_data", () => {
 
             queryParams["format"] = "json";
         
-            const jsonData =  await msoaQuery(queryParams, releaseDate);
+            const jsonData =  await msoaQuery(queryParams, releaseDate, options);
                       
             assert.strictEqual(typeof jsonData, "object");
             assert.strictEqual("body" in jsonData, true);
@@ -58,7 +119,7 @@ describe("msoa_data", () => {
     
             queryParams["format"] = "csv";
         
-            const csvData =  await msoaQuery(queryParams, releaseDate);
+            const csvData =  await msoaQuery(queryParams, releaseDate, options);
                       
             assert.strictEqual(typeof csvData, "object");
             assert.strictEqual("body" in csvData, true);
@@ -92,7 +153,7 @@ describe("msoa_data", () => {
                 
             queryParams["format"] = "jsonl";
         
-            const jsonlData =  await msoaQuery(queryParams, releaseDate);
+            const jsonlData =  await msoaQuery(queryParams, releaseDate, options);
                       
             assert.strictEqual(typeof jsonlData, "object");
             assert.strictEqual("body" in jsonlData, true);

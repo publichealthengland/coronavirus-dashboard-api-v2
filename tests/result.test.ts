@@ -86,23 +86,28 @@ describe("result", () => {
         const params = {
             format: "json",
             nestedMetrics: nestedMetrics,
-            releaseDate: releaseDate
+            releaseDate: releaseDate,
+            area: {
+                areaType: 'nation',
+                areaCode: 'E92000001',
+                areaName: 'England',
+            }
         } as ResultProcessor
 
         it('JSON integrity', async () => {
             
             const jsonData = await processResults( params )(data as GenericDBResponse);
-
+  
+            assert.notEqual(jsonData, null);
             assert.strictEqual(typeof jsonData, "object");
             assert.strictEqual("body" in jsonData, true);
             assert.strictEqual("headers" in jsonData, true);
             assert.strictEqual("content-disposition" in jsonData.headers, true);
     
-            const json = JSON.parse(jsonData.body);
+            const json = JSON.parse(jsonData.body !== null ? jsonData.body : "");
             assert.strictEqual("length" in json, true);
             assert.strictEqual("body" in  json, true);
             assert.strictEqual(json.length > 0, true);
-
 
             const max_data_date = Math.max(...data.map(e => new Date(e.date).getTime()), 0);
             const max_response_date = Math.max(...json.body.map((e: GenericJson) => new Date(e.date).getTime()));
@@ -116,25 +121,28 @@ describe("result", () => {
 
             const csvData = await processResults( params )(data as GenericDBResponse);
 
+            assert.notEqual(csvData, null);
             assert.strictEqual(typeof csvData, "object");
             assert.strictEqual("body" in csvData, true);
             assert.strictEqual("headers" in csvData, true);
             assert.strictEqual("content-disposition" in csvData.headers, true);
+
+
            
             assert.strictEqual(
-                csvData.body.split("\n").length > data.length + 1,
+                csvData.body !== null && csvData.body.split("\n").length > data.length + 1,
                 true
             );
 
             assert.strictEqual(
-                csvData.body
+                csvData.body !== null &&  csvData.body
                     .split("\n")[0]
                     .trim(),
                 Object.keys(mainResultsStructure)
                     .join(","),
             );
 
-            const arr = csvData.body.split("\n").slice(1);
+            const arr =  csvData.body !== null ? csvData.body.split("\n").slice(1) : [];
             const max_response_date = Math.max(...arr.map((e: string) => new Date(e.split(",")[0]).getTime()))
             const max_data_date = Math.max(...data.map(e => new Date(e.date).getTime()), 0);
             assert.strictEqual (max_response_date <= max_data_date, true);
@@ -147,7 +155,7 @@ describe("result", () => {
             params["format"] = "jsonl";
 
             const jsonlData = await processResults( params )(data as GenericDBResponse);
-
+            assert.notEqual(jsonlData, null);
             assert.strictEqual(typeof jsonlData, "object");
             assert.strictEqual("body" in jsonlData, true);
             assert.strictEqual("headers" in jsonlData, true);
@@ -156,11 +164,11 @@ describe("result", () => {
             assert.strictEqual(typeof jsonlData.body, "string");
 
             assert.strictEqual(
-                jsonlData.body.split("\n").length > 0,
+                jsonlData.body !== null && jsonlData.body.split("\n").length > 0,
                 true
             );
 
-            const arr = jsonlData.body.split("\n").slice(1);
+            const arr = jsonlData.body !== null ? jsonlData.body.split("\n").slice(1) : [];
             const max_response_date = Math.max(...arr.map((e: string) => new Date((JSON.parse(e)).date).getTime()));
             const max_data_date = Math.max(...data.map(e => new Date(e.date).getTime()), 0);
             assert.strictEqual (max_response_date <= max_data_date, true)

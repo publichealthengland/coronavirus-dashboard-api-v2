@@ -2,19 +2,111 @@ import { describe, it } from "mocha";
 
 import assert from "assert";
 
-import type { GenericJson } from "../data/types";
+import type { GenericJson,  RequestOptions, AreaInfo } from "../data/types";
 import processResults from "../data/processor";
 
 import * as vars from "../data/engine/queries/variables";
 
 import { GetData } from '../data/engine/database';
 
+import { getAreaInfo } from "../data/engine/queries/lookup";
+
 import { CosmosClient } from "@azure/cosmos";
 
+import { 
+    Context, 
+    HttpRequest
+} from "@azure/functions";
+
+import {
+    executionContext,
+    traceContext,
+    bindingDefinition,
+    logger
+} from './vars';
+
+const joinMetricQuery = ( metric: string ): string => {
+
+    switch ( metric ) {
+
+        case "alertLevel":
+            return `SELECT VALUE udf.processAlertLevel({
+                'date':       c.date, 
+                'alertLevel': c.alertLevel,
+                'areaCode':   c.areaCode
+            })`;
+
+    }
+
+    return "";
+
+};  // joinMetricQuery
+
+const prepareMetricName = ( metric: string ): string => {
+
+    switch ( metric ) {
+
+        case "alertLevel":
+            return `'${metric}':      (c.alertLevel ?? null),
+                    '${metric}Name':  alertLevel['value'],
+                    '${metric}Url':   alertLevel['url'],
+                    '${metric}Value': alertLevel['level']`;
+
+        default:
+            return `'${metric}': (c.${ metric } ?? null)`;
+
+    }
+
+};  // prepareMetricName
+
+const releaseDate = "2020-11-20";
+
+const metrics = "newCasesByPublishDate,femaleCases,maleCases";
+
+const request: HttpRequest = {
+
+    method: "GET",
+    url: "http://localhost:7001",
+    headers: {},
+    query: {
+        areaType: "nation",
+        areaCode: "E92000001",
+        release: releaseDate,
+        metric: metrics,
+        format: "json"
+    },
+    params: {},        
+    body: null,
+    rawBody: null
+
+};
+
+const context: Context = {
+
+    invocationId: "id",
+
+    executionContext: executionContext,
+
+    bindings: {},
+
+    bindingData: {},
+
+    traceContext: traceContext,
+
+    bindingDefinitions: bindingDefinition,
+
+    log: logger,
+
+    
+    done: () => {},
+    
+    req: request,
+    
+    res: {}
+   
+};
+
 describe("from_db main", () => {
-
-
-    const releaseDate = "2020-11-20";
 
     const resultsStructure: GenericJson = {
         "date": "date",
@@ -26,7 +118,9 @@ describe("from_db main", () => {
         "value": "value",
         "rate": "rate"
     };
-    
+
+    const areaType = "nation";
+    const areaCode = "E92000001"
     
     const container = new CosmosClient(vars.DB_CONNECTION)
                         .database(vars.DB_NAME)
@@ -46,42 +140,88 @@ describe("from_db main", () => {
             "femaleCases"
         ];
 
+        const jsonMetrics: string[] = [
+        ];
+
         // DB Query params
         const parameters = [
             {
-                name: '@areaType', 
-                value: 'nation'
+                name: "@areaType", 
+                value: areaType
             },
             {
-                name: '@areaCode',
-                value: 'E92000001'
+                name: "@seriesDate",
+                value: releaseDate
             }
         ];
 
-        const queryFilters = "c.areaType = 'nation' AND c.areaCode = 'E92000001'";
+        let queryFilters = "c.areaType = @areaType";
 
-          // Process metrics
+        const existenceFilters = [];
+        const joinQueries = [];
+
+        for ( const metric of rawMetrics ) {
+
+            existenceFilters.push(`IS_DEFINED(c.${metric})`);
+
+            // Join query for nested metric - must be handled as a ``case`` 
+            // in the ``joinMetricQuery`` func. 
+            if ( jsonMetrics.indexOf(metric) > -1 ) {
+
+                joinQueries.push(`JOIN (${ joinMetricQuery(metric) }) AS ${ metric }`);
+
+            }
+
+        }
+
+        if ( areaCode ) {
+
+            queryFilters += " AND c.areaCode = @areaCode";
+
+            parameters.push({
+                name: "@areaCode",
+                value: areaCode
+            });
+
+        }
+
+        // Process metrics
         const metrics = [
             "'date': c.date",
             "'areaType': c.areaType",
             "'areaCode': c.areaCode",
             "'areaName': c.areaName",
-            ...rawMetrics.map(metric => `'${metric}': c.${metric} ?? null`)
+            ...rawMetrics.map(prepareMetricName)
         ].join(", ");
 
-         // Final query
-        const query = `SELECT VALUE {${metrics}}
-            FROM c
-            WHERE ${queryFilters}
-            ORDER BY c.areaType ASC, c.areaCode ASC, c.date DESC`;
+        // Final query
+        const query = `SELECT VALUE {${ metrics }}
+                    FROM c
+                    ${ joinQueries.join("\n") }
+                    WHERE 
+                            c.seriesDate = @seriesDate
+                        AND ${ queryFilters } 
+                        AND (${ existenceFilters.join(" OR ") })
+                    `;
 
-        const data =  await GetData(query, parameters, {
-                                    container: container,
-                                    partitionKey: releaseDate,
-                                    processor: processResults({ format, nestedMetrics, releaseDate })
+        const area = getAreaInfo(areaType, areaCode);
+
+        const options: RequestOptions = {
+            context: context,
+            request: request
+        };
+        
+        return GetData(query, parameters, {
+            container: container,
+            partitionKey: releaseDate,
+            requestOptions: options,
+            processor: processResults({
+                format, 
+                nestedMetrics, 
+                releaseDate,
+                area: await area as unknown as AreaInfo
+            }),
         });
-
-        return data
     }
 
     describe('#GetData', () => {
@@ -94,6 +234,7 @@ describe("from_db main", () => {
             assert.strictEqual("body" in jsonData, true);
             assert.strictEqual("headers" in jsonData, true);
             assert.strictEqual("content-disposition" in jsonData.headers, true);
+            assert.notStrictEqual(jsonData.body, null);
 
             const json = JSON.parse(jsonData.body);
             assert.strictEqual("length" in json, true);

@@ -2,11 +2,75 @@ import { describe, it } from "mocha";
 
 import assert from "assert";
 
-import type { QueryParamsType, GenericJson } from "../data/types";
+import type { QueryParamsType, GenericJson, RequestOptions } from "../data/types";
 
 import { mainDataQuery } from '../data/engine';
 
+import { 
+    Context, 
+    HttpRequest
+} from "@azure/functions";
+
+import {
+    executionContext,
+    traceContext,
+    bindingDefinition,
+    logger
+} from './vars';
+
 describe("main_data", () => {
+
+    const releaseDate = "2020-11-20T00:00:00.000Z";
+    const metrics = "newCasesByPublishDate,femaleCases,maleCases";
+
+    const request: HttpRequest = {
+
+        method: "GET",
+        url: "http://localhost:7001",
+        headers: {},
+        query: {
+            areaType: "nation",
+            areaCode: "E92000001",
+            release: releaseDate,
+            metric: metrics,
+            format: "json"
+        },
+        params: {},        
+        body: null,
+        rawBody: null
+    
+    };
+    
+    const context: Context = {
+    
+        invocationId: "id",
+    
+        executionContext: executionContext,
+    
+        bindings: {},
+    
+        bindingData: {},
+    
+        traceContext: traceContext,
+    
+        bindingDefinitions: bindingDefinition,
+    
+        log: logger,
+    
+        
+        done: () => {},
+        
+        req: request,
+        
+        res: {}
+       
+    };
+    
+
+    const options: RequestOptions = {
+        context: context,
+        request: request
+    };
 
     const releasedMetrics: GenericJson = {
         "newCasesByPublishDate": "int",
@@ -25,8 +89,7 @@ describe("main_data", () => {
         "rate": "rate"
     };
 
-    const releaseDate = "2020-11-20T00:00:00.000Z";
-    const metrics = "newCasesByPublishDate,femaleCases,maleCases";
+   
 
     const queryParams: QueryParamsType = {
         areaType: "nation",
@@ -42,7 +105,7 @@ describe("main_data", () => {
 
             queryParams["format"] = "json";
         
-            const jsonData =  await mainDataQuery(queryParams, releasedMetrics);
+            const jsonData =  await mainDataQuery(queryParams, releasedMetrics, options);
                       
             assert.strictEqual(typeof jsonData, "object");
             assert.strictEqual("body" in jsonData, true);
@@ -65,7 +128,7 @@ describe("main_data", () => {
 
             queryParams["format"] = "csv";
         
-            const csvData =  await mainDataQuery(queryParams, releasedMetrics);
+            const csvData =  await mainDataQuery(queryParams, releasedMetrics, options);
 
             assert.strictEqual(typeof csvData, "object");
             assert.strictEqual("body" in csvData, true);
@@ -99,7 +162,7 @@ describe("main_data", () => {
 
             queryParams["format"] = "jsonl";
         
-            const jsonlData =  await mainDataQuery(queryParams, releasedMetrics);
+            const jsonlData =  await mainDataQuery(queryParams, releasedMetrics, options);
 
             assert.strictEqual(typeof jsonlData, "object");
             assert.strictEqual("body" in jsonlData, true);

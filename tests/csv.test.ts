@@ -84,22 +84,24 @@ describe("csv", () => {
     
             const csv =  toCSV(data as GenericDBResponse, nestedMetrics);
 
+            assert.notEqual(csv, null);
+
             assert.strictEqual(typeof csv, "string");
            
             assert.strictEqual(
-                csv.split("\n").length > data.length + 1,
+                csv !== null && csv.split("\n").length > data.length + 1,
                 true
             );
 
             assert.strictEqual(
-                csv
+                csv !== null && csv
                     .split("\n")[0]
                     .trim(),
                 Object.keys(mainResultsStructure)
                     .join(","),
             );
 
-            const arr = csv.split("\n").slice(1);
+            const arr = csv !== null ? csv.split("\n").slice(1) : [];
             const max_response_date = Math.max(...arr.map((e: string) => new Date(e.split(",")[0]).getTime()))
             const max_data_date = Math.max(...data.map(e => new Date(e.date).getTime()), 0);
             assert.strictEqual (max_response_date <= max_data_date, true);
@@ -192,22 +194,24 @@ describe("csv", () => {
     
             const csv =  toCSV(data as GenericDBResponse, nestedMetrics)
 
+            assert.notEqual(csv, null);
+
             assert.strictEqual(typeof csv, "string");
            
             assert.strictEqual(
-                csv.split("\n").length === data.length + 1,
+                csv !== null && csv.split("\n").length === data.length + 1,
                 true
             );
 
             assert.strictEqual(
-                csv
+                csv !== null && csv
                     .split("\n")[0]
                     .trim(),
                 Object.keys(msoaResultsStructure)
                     .join(","),
             );
 
-            const arr = csv.split("\n").slice(1);
+            const arr = csv !== null ? csv.split("\n").slice(1) : [];
             const max_response_date = Math.max(...arr.map((e: string) => new Date(e.split(",")[9]).getTime()))
             const max_data_date = Math.max(...data.map(e => new Date(e.date).getTime()), 0);
             assert.strictEqual (max_response_date <= max_data_date, true);

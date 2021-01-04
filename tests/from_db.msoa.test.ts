@@ -2,7 +2,7 @@ import { describe, it } from "mocha";
 
 import assert from "assert";
 
-import type { GenericJson } from "../data/types";
+import type { GenericJson, RequestOptions } from "../data/types";
 import processResults from "../data/processor";
 
 import * as vars from "../data/engine/queries/variables";
@@ -13,12 +13,75 @@ import { GetData } from '../data/engine/database';
 
 import { CosmosClient } from "@azure/cosmos";
 
+import { 
+    Context, 
+    HttpRequest
+} from "@azure/functions";
+
+import {
+    executionContext,
+    traceContext,
+    bindingDefinition,
+    logger
+} from './vars';
+
+let today = new Date ();
+
+const releaseDate =  moment(today.setDate(today.getDate()-1)).format( "YYYY-MM-DD");
+
+const metrics = "newCasesBySpecimenDateRollingSum," +
+                "newCasesBySpecimenDateRollingRate," +
+                "newCasesBySpecimenDateChange," +
+                "newCasesBySpecimenDateChangePercentage," +
+                "newCasesBySpecimenDateDirection"
+
+const request: HttpRequest = {
+
+    method: "GET",
+    url: "http://localhost:7001",
+    headers: {},
+    query: {
+        areaType: "nation",
+        areaCode: "E92000001",
+        release: releaseDate,
+        metric: metrics,
+        format: "json"
+    },
+    params: {},        
+    body: null,
+    rawBody: null
+
+};
+
+const context: Context = {
+
+    invocationId: "id",
+
+    executionContext: executionContext,
+
+    bindings: {},
+
+    bindingData: {},
+
+    traceContext: traceContext,
+
+    bindingDefinitions: bindingDefinition,
+
+    log: logger,
+
+    
+    done: () => {},
+    
+    req: request,
+    
+    res: {}
+   
+};
+
 describe("from_db msoa", () => {
 
 
-    let today = new Date ();
-
-    const releaseDate =  moment(today.setDate(today.getDate()-1)).format( "YYYY-MM-DD");
+   
 
     const container = new CosmosClient(vars.DB_CONNECTION)
                         .database(vars.DB_NAME)
@@ -87,13 +150,25 @@ describe("from_db msoa", () => {
                         FROM c
                         JOIN cases IN c.newCasesBySpecimenDate
                         WHERE ${queryFilters}`;
+   
+        const options: RequestOptions = {
+                context: context,
+                request: request
+        };
 
-        const data =  await GetData(query, parameters, {
-                                    container: container,
-                                    processor: processResults({ format, releaseDate })
-        });
-
-        return data
+        return GetData(query, parameters, {
+                            container: container,
+                            requestOptions: options,
+                            processor: processResults({ 
+                                format: format, 
+                                releaseDate: releaseDate,
+                                area: {
+                                    areaType: 'msoa',
+                                    areaName: null,
+                                    areaCode: 'E09000014'
+                                }
+                            })
+                        });
     }
 
     describe('#GetData', () => {
