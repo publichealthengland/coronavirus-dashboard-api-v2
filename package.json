@@ -1,6 +1,6 @@
 {
     "name": "coronavirus-api-batch",
-    "version": "2.2.3",
+    "version": "2.3.4",
     "description": "",
     "scripts": {
         "build": "tsc",
@@ -9,7 +9,9 @@
         "start": "func start",
         "test": "mocha -r ts-node/register tests/**/*.test.ts --timeout 10000"
     },
-    "dependencies": {},
+    "dependencies": {
+        "applicationinsights": "^1.8.8"
+    },
     "devDependencies": {
         "@types/assert": "^1.5.1",
         "@types/chai": "^4.2.12",

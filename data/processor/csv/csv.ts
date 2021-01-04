@@ -17,18 +17,11 @@ const flatten = ( doc: DBResponseItem ): any[] => {
     const initialKeys = Object.keys(doc);
 
 
-    let nestedColumns: string[] = initialKeys.reduce((acc: string[], item: string, ind: number) => {
+    let nestedColumns: Set<string> = new Set(initialKeys.reduce((acc: string[], item: string, ind: number) => {
             return Array.isArray(doc[initialKeys[ind]]) 
                 ? [...acc, item]
                 : acc
-        }, []);
-
-
-    for ( let ind = 0; ind < initialKeys.length; ind++ ) {
-        if ( Array.isArray(doc[initialKeys[ind]]) ) 
-            nestedColumns.push(initialKeys[ind]);
-    }
-
+        }, []));
 
     const baseColumns = [
         "date",
@@ -73,12 +66,14 @@ const flatten = ( doc: DBResponseItem ): any[] => {
 
 const toCsv = (docs: GenericDBResponse, nestedMetrics: string[]) => {
 
+    if ( !docs?.length ) return null;
+
     const flattenedDocs = 
         nestedMetrics.length > 0
             ? docs.map(flatten).reduce((acc, item) => [...acc, ...item], [])
             : docs;
 
-    const result      = Array(flattenedDocs.length).fill("");
+    const result      = new Array(flattenedDocs.length).fill("");
 
     const sampleIndex = flattenedDocs
         .map((item, ind) => [Object.keys(item).length, ind])
