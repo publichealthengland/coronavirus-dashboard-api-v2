@@ -2,13 +2,100 @@ import { describe, it } from "mocha";
 
 import assert from "assert";
 
-import type { GenericDBResponse, GenericJson } from "../data/types";
+import type { GenericDBResponse, DBObject } from "../data/types";
 
 import { mainResultsStructure, msoaResultsStructure } from './vars';
 
 import toCSV from '../data/processor/csv';
 
 describe("csv", () => {
+
+    const csvToArray = (text: string) => {
+        let p = '', row = [''], ret = [row], i = 0, r = 0, s = !0, l;
+        for (l of text) {
+            if ('"' === l) {
+                if (s && l === p) row[i] += l;
+                s = !s;
+            } else if (',' === l && s) l = row[++i] = '';
+            else if ('\n' === l && s) {
+                if ('\r' === p) row[i] = row[i].slice(0, -1);
+                row = ret[++r] = [l = '']; i = 0;
+            } else row[i] += l;
+            p = l;
+        }
+        return ret;
+    };
+
+    const checkMsoaDuplicates = (csv: string, data: GenericDBResponse) => {
+        
+        const arr = csvToArray(csv).slice(1);
+
+        console.log(arr)
+
+        data.forEach(element => {
+            
+            const dte = element.date;
+
+            let metric = element.newCasesBySpecimenDateRollingSum;
+            let line = arr.filter(item => item[9] === dte && parseFloat(item[10]) === metric);
+            assert.strictEqual(line.length, 1);
+
+            metric = element.newCasesBySpecimenDateRollingRate;
+            line = arr.filter(item => item[9] === dte && parseFloat(item[11]) === metric);
+            assert.strictEqual(line.length, 1);
+
+            metric = element.newCasesBySpecimenDateChange;
+            line = arr.filter(item => item[9] === dte && parseFloat(item[12]) === metric);
+            assert.strictEqual(line.length, 1);
+
+            metric = element.newCasesBySpecimenDateChangePercentage;
+            line = arr.filter(item => item[9] === dte && parseFloat(item[13]) === metric);
+            assert.strictEqual(line.length, 1);
+
+            metric = element.newCasesBySpecimenDateDirection;
+            line = arr.filter(item => item[9] === dte && item[14] === metric);
+            assert.strictEqual(line.length, 1);
+        });
+    };
+
+    const checkMainDuplicates = (csv: string, data: GenericDBResponse) => {
+
+        const arr = csvToArray(csv).slice(1);
+        
+        data.forEach(element => {
+
+            const dte = element.date;
+            const metric = element.newCasesByPublishDate;
+            
+            let line = arr.filter(item => item[0] === dte && 
+                                    item[4] === 'newCasesByPublishDate' && 
+                                    parseInt(item[7]) === metric);
+            
+            assert.strictEqual(line.length, 1);
+
+            let ages = (element.femaleCases as DBObject[]).map(item => item.age);
+            
+            ages.forEach(age => {
+
+                line = arr.filter(item => item[0] === dte && item[4] === 'femaleCases' && item[5] === age);
+
+                assert.strictEqual(line.length, 1);
+
+            });
+
+            ages = (element.maleCases as DBObject[]).map(item => item.age);
+            
+            ages.forEach(age => {
+
+                line = arr.filter(item => item[0] === dte && item[4] === 'maleCases' && item[5] === age);
+
+                assert.strictEqual(line.length, 1);
+
+            });
+    
+            
+        });
+    }
 
     describe('#toCSV main', () => {
 
@@ -21,9 +108,11 @@ describe("csv", () => {
                 newCasesByPublishDate: 300,
                 femaleCases:  [
                     {"age":"55_to_59","rate":2517.1,"value":48502},
+                    {"age":"35_to_39","rate":3374.3,"value":64361},
                     {"age":"20_to_24","rate":4088.8,"value":64919}
                 ],
                 maleCases:  [
+                    {"age":"55_to_59","rate":2517.1,"value":48502},
                     {"age":"35_to_39","rate":3374.3,"value":64361},
                     {"age":"25_to_29","rate":4329.4,"value":73389}
                 ]
@@ -36,10 +125,12 @@ describe("csv", () => {
                 newCasesByPublishDate: 300,
                 femaleCases:  [
                     {"age":"55_to_59","rate":2517.1,"value":48502},
+                    {"age":"35_to_39","rate":3374.3,"value":64361},
                     {"age":"20_to_24","rate":4088.8,"value":64919}
                 ],
                 maleCases:  [
                     {"age":"55_to_59","rate":2517.1,"value":48502},
+                    {"age":"35_to_39","rate":3374.3,"value":64361},
                     {"age":"20_to_24","rate":4088.8,"value":64919}
                 ]
             },
@@ -51,10 +142,12 @@ describe("csv", () => {
                 newCasesByPublishDate: 110,
                 femaleCases:  [
                     {"age":"55_to_59","rate":2517.1,"value":48502},
+                    {"age":"35_to_39","rate":3374.3,"value":64361},
                     {"age":"20_to_24","rate":4088.8,"value":64919}
                 ],
                 maleCases:  [
                     {"age":"55_to_59","rate":2517.1,"value":48502},
+                    {"age":"35_to_39","rate":3374.3,"value":64361},
                     {"age":"20_to_24","rate":4088.8,"value":64919}
                 ]
             },
@@ -66,10 +159,12 @@ describe("csv", () => {
                 newCasesByPublishDate: 92,
                 femaleCases:  [
                     {"age":"55_to_59","rate":2517.1,"value":48502},
+                    {"age":"35_to_39","rate":3374.3,"value":64361},
                     {"age":"20_to_24","rate":4088.8,"value":64919}
                 ],
                 maleCases:  [
                     {"age":"55_to_59","rate":2517.1,"value":48502},
+                    {"age":"35_to_39","rate":3374.3,"value":64361},
                     {"age":"20_to_24","rate":4088.8,"value":64919}
                 ]
             }
@@ -105,6 +200,8 @@ describe("csv", () => {
             const max_response_date = Math.max(...arr.map((e: string) => new Date(e.split(",")[0]).getTime()))
             const max_data_date = Math.max(...data.map(e => new Date(e.date).getTime()), 0);
             assert.strictEqual (max_response_date <= max_data_date, true);
+
+            checkMainDuplicates(csv !== null ? csv : "", data);
 
         });
 
@@ -142,7 +239,7 @@ describe("csv", () => {
                 areaType: "msoa",
                 areaCode: "E02000402",
                 areaName: "Tottenham Bruce Castle Park",
-                date: "2020-12-05",
+                date: "2020-12-04",
                 newCasesBySpecimenDateRollingSum: 12,
                 newCasesBySpecimenDateRollingRate: 181.5,
                 newCasesBySpecimenDateChange: -1,
@@ -160,7 +257,7 @@ describe("csv", () => {
                 areaCode: "E02000402",
                 areaName: "Tottenham Bruce Castle Park",
                 date: "2020-11-28",
-                newCasesBySpecimenDateRollingSum: 13,
+                newCasesBySpecimenDateRollingSum: 14,
                 newCasesBySpecimenDateRollingRate: 196.6,
                 newCasesBySpecimenDateChange: 2,
                 newCasesBySpecimenDateChangePercentage: 18.2,
@@ -178,7 +275,7 @@ describe("csv", () => {
                 areaCode: "E02000402",
                 areaName: "Tottenham Bruce Castle Park",
                 date: "2020-11-21",
-                newCasesBySpecimenDateRollingSum: 11,
+                newCasesBySpecimenDateRollingSum: 15,
                 newCasesBySpecimenDateRollingRate: 166.4,
                 newCasesBySpecimenDateChange: -4,
                 newCasesBySpecimenDateChangePercentage: -26.7,
@@ -215,6 +312,8 @@ describe("csv", () => {
             const max_response_date = Math.max(...arr.map((e: string) => new Date(e.split(",")[9]).getTime()))
             const max_data_date = Math.max(...data.map(e => new Date(e.date).getTime()), 0);
             assert.strictEqual (max_response_date <= max_data_date, true);
+
+            checkMsoaDuplicates(csv !== null ? csv : "", data);
 
         });
 
