@@ -10,18 +10,10 @@ import { msoaResultsStructure } from './vars';
 
 import moment from 'moment';
 
-import { 
-    Context, 
-    HttpRequest
-} from "@azure/functions";
-
 import {
-    executionContext,
-    traceContext,
-    bindingDefinition,
-    logger
+    request,
+    context
 } from './vars';
-
 
 describe("msoa_data", () => {
 
@@ -34,48 +26,8 @@ describe("msoa_data", () => {
     let today = new Date ();
     const releaseDate =  moment(today.setDate(today.getDate()-1)).format( "YYYY-MM-DD");
 
-    const request: HttpRequest = {
-
-        method: "GET",
-        url: "http://localhost:7001",
-        headers: {},
-        query: {
-            areaType: "nation",
-            areaCode: "E92000001",
-            release: releaseDate,
-            metric: metrics,
-            format: "json"
-        },
-        params: {},        
-        body: null,
-        rawBody: null
-    
-    };
-    
-    const context: Context = {
-    
-        invocationId: "id",
-    
-        executionContext: executionContext,
-    
-        bindings: {},
-    
-        bindingData: {},
-    
-        traceContext: traceContext,
-    
-        bindingDefinitions: bindingDefinition,
-    
-        log: logger,
-    
-        
-        done: () => {},
-        
-        req: request,
-        
-        res: {}
-       
-    };
+    request["query"]["release"] = releaseDate;
+    request["query"]["metric"] = metrics;
 
     const options: RequestOptions = {
         context: context,

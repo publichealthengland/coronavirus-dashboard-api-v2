@@ -84,7 +84,7 @@ describe("csv", () => {
     
             const csv =  toCSV(data as GenericDBResponse, nestedMetrics);
 
-            assert.notEqual(csv, null);
+            assert.notStrictEqual(csv, null);
 
             assert.strictEqual(typeof csv, "string");
            
@@ -194,7 +194,7 @@ describe("csv", () => {
     
             const csv =  toCSV(data as GenericDBResponse, nestedMetrics)
 
-            assert.notEqual(csv, null);
+            assert.notStrictEqual(csv, null);
 
             assert.strictEqual(typeof csv, "string");
            

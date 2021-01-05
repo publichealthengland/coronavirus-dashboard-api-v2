@@ -2,16 +2,10 @@ import { describe, it } from "mocha";
 
 import assert from "assert";
 
-import { 
-    Context, 
-    HttpRequest
-} from "@azure/functions";
+import { HttpRequest } from "@azure/functions";
 
 import {
-    executionContext,
-    traceContext,
-    bindingDefinition,
-    logger
+    context
 } from './vars';
 
 import type { GenericJson } from "../data/types";
@@ -21,7 +15,7 @@ import httpTrigger from '../data/index';
 
 describe("index main", () => {
 
-    const releaseDate = "2020-11-20T00:00:00.000Z";
+    const releaseDate = "2020-11-20";
 
     const metrics = "newCasesByPublishDate,femaleCases,maleCases";
 
@@ -54,31 +48,6 @@ describe("index main", () => {
     
     };
 
-    const context: Context = {
-
-        invocationId: "id",
-    
-        executionContext: executionContext,
-    
-        bindings: {},
-    
-        bindingData: {},
-    
-        traceContext: traceContext,
-    
-        bindingDefinitions: bindingDefinition,
-    
-        log: logger,
-    
-        
-        done: () => {},
-        
-        req: request,
-        
-        res: {}
-       
-    };
-
 
     const apiMetrics: GenericJson = {
         "newCasesByPublishDate": "int",
@@ -107,6 +76,7 @@ describe("index main", () => {
             assert.strictEqual (max_response_date <= new Date(releaseDate).getTime(), true);
 
             assert.strictEqual(json.length > 10, true);
+            
         });
 
         it('CSV integrity',  async () => {

@@ -98,7 +98,7 @@ describe("result", () => {
             
             const jsonData = await processResults( params )(data as GenericDBResponse);
   
-            assert.notEqual(jsonData, null);
+            assert.notStrictEqual(jsonData, null);
             assert.strictEqual(typeof jsonData, "object");
             assert.strictEqual("body" in jsonData, true);
             assert.strictEqual("headers" in jsonData, true);
@@ -121,7 +121,7 @@ describe("result", () => {
 
             const csvData = await processResults( params )(data as GenericDBResponse);
 
-            assert.notEqual(csvData, null);
+            assert.notStrictEqual(csvData, null);
             assert.strictEqual(typeof csvData, "object");
             assert.strictEqual("body" in csvData, true);
             assert.strictEqual("headers" in csvData, true);
@@ -155,7 +155,7 @@ describe("result", () => {
             params["format"] = "jsonl";
 
             const jsonlData = await processResults( params )(data as GenericDBResponse);
-            assert.notEqual(jsonlData, null);
+            assert.notStrictEqual(jsonlData, null);
             assert.strictEqual(typeof jsonlData, "object");
             assert.strictEqual("body" in jsonlData, true);
             assert.strictEqual("headers" in jsonlData, true);

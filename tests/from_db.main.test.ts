@@ -13,16 +13,9 @@ import { getAreaInfo } from "../data/engine/queries/lookup";
 
 import { CosmosClient } from "@azure/cosmos";
 
-import { 
-    Context, 
-    HttpRequest
-} from "@azure/functions";
-
 import {
-    executionContext,
-    traceContext,
-    bindingDefinition,
-    logger
+    request,
+    context
 } from './vars';
 
 const joinMetricQuery = ( metric: string ): string => {
@@ -59,54 +52,15 @@ const prepareMetricName = ( metric: string ): string => {
 
 };  // prepareMetricName
 
-const releaseDate = "2020-11-20";
-
-const metrics = "newCasesByPublishDate,femaleCases,maleCases";
-
-const request: HttpRequest = {
-
-    method: "GET",
-    url: "http://localhost:7001",
-    headers: {},
-    query: {
-        areaType: "nation",
-        areaCode: "E92000001",
-        release: releaseDate,
-        metric: metrics,
-        format: "json"
-    },
-    params: {},        
-    body: null,
-    rawBody: null
-
-};
-
-const context: Context = {
-
-    invocationId: "id",
-
-    executionContext: executionContext,
-
-    bindings: {},
-
-    bindingData: {},
-
-    traceContext: traceContext,
-
-    bindingDefinitions: bindingDefinition,
-
-    log: logger,
-
-    
-    done: () => {},
-    
-    req: request,
-    
-    res: {}
-   
-};
-
 describe("from_db main", () => {
+
+
+    const releaseDate = "2020-11-20";
+
+    // const metrics = "newCasesByPublishDate,femaleCases,maleCases";
+
+    request["query"]["release"] = releaseDate;
+    request["query"]["metric"] = "newCasesByPublishDate,femaleCases,maleCases";
 
     const resultsStructure: GenericJson = {
         "date": "date",
@@ -126,91 +80,90 @@ describe("from_db main", () => {
                         .database(vars.DB_NAME)
                         .container(vars.PUBLIC_DATA);
 
-    const runTest = async (format: string)  => {
-        
-       
-        const rawMetrics: string[] = [
-            "newCasesByPublishDate", 
-            "femaleCases",
-            "maleCases"
-        ];
-
-        const nestedMetrics: string[] = [
-            "maleCases", 
-            "femaleCases"
-        ];
-
-        const jsonMetrics: string[] = [
-        ];
-
-        // DB Query params
-        const parameters = [
-            {
-                name: "@areaType", 
-                value: areaType
-            },
-            {
-                name: "@seriesDate",
-                value: releaseDate
-            }
-        ];
-
-        let queryFilters = "c.areaType = @areaType";
-
-        const existenceFilters = [];
-        const joinQueries = [];
-
-        for ( const metric of rawMetrics ) {
-
-            existenceFilters.push(`IS_DEFINED(c.${metric})`);
-
-            // Join query for nested metric - must be handled as a ``case`` 
-            // in the ``joinMetricQuery`` func. 
-            if ( jsonMetrics.indexOf(metric) > -1 ) {
-
-                joinQueries.push(`JOIN (${ joinMetricQuery(metric) }) AS ${ metric }`);
-
-            }
-
+    const rawMetrics: string[] = [
+        "newCasesByPublishDate", 
+        "femaleCases",
+        "maleCases"
+    ];
+                
+    const nestedMetrics: string[] = [
+        "maleCases", 
+        "femaleCases"
+    ];
+                
+    const jsonMetrics: string[] = [
+    ];
+                
+    // DB Query params
+    const parameters = [
+        {
+            name: "@areaType", 
+            value: areaType
+        },
+        {
+            name: "@seriesDate",
+            value: releaseDate
         }
-
-        if ( areaCode ) {
-
-            queryFilters += " AND c.areaCode = @areaCode";
-
-            parameters.push({
-                name: "@areaCode",
-                value: areaCode
-            });
-
-        }
-
-        // Process metrics
-        const metrics = [
-            "'date': c.date",
-            "'areaType': c.areaType",
-            "'areaCode': c.areaCode",
-            "'areaName': c.areaName",
-            ...rawMetrics.map(prepareMetricName)
-        ].join(", ");
-
-        // Final query
-        const query = `SELECT VALUE {${ metrics }}
+    ];
+                
+    let queryFilters = "c.areaType = @areaType";
+                
+    const existenceFilters = [];
+    const joinQueries = [];
+                
+    for ( const metric of rawMetrics ) {
+                
+        existenceFilters.push(`IS_DEFINED(c.${metric})`);
+                
+        // Join query for nested metric - must be handled as a ``case`` 
+        // in the ``joinMetricQuery`` func. 
+        if ( jsonMetrics.indexOf(metric) > -1 ) {
+                
+            joinQueries.push(`JOIN (${ joinMetricQuery(metric) }) AS ${ metric }`);
+                
+            }
+                
+    }
+                
+    if ( areaCode ) {
+                
+        queryFilters += " AND c.areaCode = @areaCode";
+                
+        parameters.push({
+            name: "@areaCode",
+            value: areaCode
+        });
+                
+    }
+                
+    // Process metrics
+    const metrics = [
+        "'date': c.date",
+        "'areaType': c.areaType",
+        "'areaCode': c.areaCode",
+         "'areaName': c.areaName",
+         ...rawMetrics.map(prepareMetricName)
+    ].join(", ");
+                
+    // Final query
+    const query = `SELECT VALUE {${ metrics }}
                     FROM c
                     ${ joinQueries.join("\n") }
                     WHERE 
-                            c.seriesDate = @seriesDate
-                        AND ${ queryFilters } 
-                        AND (${ existenceFilters.join(" OR ") })
-                    `;
+                    c.seriesDate = @seriesDate
+                    AND ${ queryFilters } 
+                    AND (${ existenceFilters.join(" OR ") })
+                 `;
+                
+    const area = getAreaInfo(areaType, areaCode);
+                
+    const options: RequestOptions = {
+        context: context,
+        request: request
+    };
 
-        const area = getAreaInfo(areaType, areaCode);
-
-        const options: RequestOptions = {
-            context: context,
-            request: request
-        };
-        
+    const runTest = async (format: string)  => {
+         
         return GetData(query, parameters, {
             container: container,
             partitionKey: releaseDate,

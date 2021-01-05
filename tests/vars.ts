@@ -2,6 +2,11 @@
 import type { GenericJson } from "../data/types";
 
 import { 
+    Context, 
+    HttpRequest
+} from "@azure/functions";
+
+import { 
     ExecutionContext, 
     TraceContext,
     BindingDefinition,
@@ -69,5 +74,48 @@ export const bindingDefinition: BindingDefinition[] = [
 ];
 
 export const logger = {} as Logger;
+
+export const request: HttpRequest = {
+
+    method: "GET",
+    url: "http://localhost:7001",
+    headers: {},
+    query: {
+        areaType: "nation",
+        areaCode: "E92000001",
+        release: "",
+        metric: "",
+        format: "json"
+    },
+    params: {},        
+    body: null,
+    rawBody: null
+
+};
+
+export const context: Context = {
+
+    invocationId: "id",
+
+    executionContext: executionContext,
+
+    bindings: {},
+
+    bindingData: {},
+
+    traceContext: traceContext,
+
+    bindingDefinitions: bindingDefinition,
+
+    log: logger,
+
+    
+    done: () => {},
+    
+    req: request,
+    
+    res: {}
+   
+};
 
 

@@ -13,75 +13,25 @@ import { GetData } from '../data/engine/database';
 
 import { CosmosClient } from "@azure/cosmos";
 
-import { 
-    Context, 
-    HttpRequest
-} from "@azure/functions";
-
 import {
-    executionContext,
-    traceContext,
-    bindingDefinition,
-    logger
+    request,
+    context
 } from './vars';
-
-let today = new Date ();
-
-const releaseDate =  moment(today.setDate(today.getDate()-1)).format( "YYYY-MM-DD");
-
-const metrics = "newCasesBySpecimenDateRollingSum," +
-                "newCasesBySpecimenDateRollingRate," +
-                "newCasesBySpecimenDateChange," +
-                "newCasesBySpecimenDateChangePercentage," +
-                "newCasesBySpecimenDateDirection"
-
-const request: HttpRequest = {
-
-    method: "GET",
-    url: "http://localhost:7001",
-    headers: {},
-    query: {
-        areaType: "nation",
-        areaCode: "E92000001",
-        release: releaseDate,
-        metric: metrics,
-        format: "json"
-    },
-    params: {},        
-    body: null,
-    rawBody: null
-
-};
-
-const context: Context = {
-
-    invocationId: "id",
-
-    executionContext: executionContext,
-
-    bindings: {},
-
-    bindingData: {},
-
-    traceContext: traceContext,
-
-    bindingDefinitions: bindingDefinition,
-
-    log: logger,
-
-    
-    done: () => {},
-    
-    req: request,
-    
-    res: {}
-   
-};
 
 describe("from_db msoa", () => {
 
 
-   
+    let today = new Date ();
+
+    const releaseDate =  moment(today.setDate(today.getDate()-1)).format( "YYYY-MM-DD");
+
+
+    request["query"]["release"] = releaseDate;
+    request["query"]["metric"] = "newCasesBySpecimenDateRollingSum," +
+                                    "newCasesBySpecimenDateRollingRate," +
+                                    "newCasesBySpecimenDateChange," +
+                                    "newCasesBySpecimenDateChangePercentage," +
+                                    "newCasesBySpecimenDateDirection";
 
     const container = new CosmosClient(vars.DB_CONNECTION)
                         .database(vars.DB_NAME)
@@ -113,62 +63,61 @@ describe("from_db msoa", () => {
         "newCasesBySpecimenDateRollingRate"
     ];
 
-    const runTest = async (format: string)  => {
+     // DB Query params
+     const parameters = [
+        {name: "@areaType", value: 'msoa'},
+        {name: "@areaCode", value: 'E09000014'},
         
-      
-        // DB Query params
-        const parameters = [
-            {name: "@areaType", value: 'msoa'},
-            {name: "@areaCode", value: 'E09000014'},
-            
-        ];
+    ];
 
-        let queryFilters = "c.areaType = 'msoa'";
+    let queryFilters = "c.areaType = 'msoa'";
 
-        queryFilters += `AND ( 
-                        c.areaCode   = 'E09000014'
-                        OR c.LtlaCode   = 'E09000014'
-                        OR c.UtlaCode   = 'E09000014'
-                        OR c.regionCode = 'E09000014'
-                    )`;
+    queryFilters += `AND ( 
+                    c.areaCode   = 'E09000014'
+                    OR c.LtlaCode   = 'E09000014'
+                    OR c.UtlaCode   = 'E09000014'
+                    OR c.regionCode = 'E09000014'
+                )`;
 
 
-        // Process metrics
-        const metrics = [
+    // Process metrics
+    const metrics = [
 
-        ...Object
-            .keys(defaultMetrics)
-            .map(key => `'${key}': ${defaultMetrics[key]}`),
+    ...Object
+        .keys(defaultMetrics)
+        .map(key => `'${key}': ${defaultMetrics[key]}`),
 
-        ...rawMetrics
-            .map(metric => `'${metric}': cases.${msoaMetrics[metric]} ?? null`)
+    ...rawMetrics
+        .map(metric => `'${metric}': cases.${msoaMetrics[metric]} ?? null`)
 
-        ];
+    ];
 
-         // Final query
-        const query = `SELECT VALUE {${metrics.join(", ")}}
-                        FROM c
-                        JOIN cases IN c.newCasesBySpecimenDate
-                        WHERE ${queryFilters}`;
-   
-        const options: RequestOptions = {
-                context: context,
-                request: request
-        };
+     // Final query
+    const query = `SELECT VALUE {${metrics.join(", ")}}
+                    FROM c
+                    JOIN cases IN c.newCasesBySpecimenDate
+                    WHERE ${queryFilters}`;
 
+    const options: RequestOptions = {
+            context: context,
+            request: request
+    };
+
+    const runTest = async (format: string)  => {
+         
         return GetData(query, parameters, {
-                            container: container,
-                            requestOptions: options,
-                            processor: processResults({ 
-                                format: format, 
-                                releaseDate: releaseDate,
-                                area: {
-                                    areaType: 'msoa',
-                                    areaName: null,
-                                    areaCode: 'E09000014'
-                                }
-                            })
-                        });
+                        container: container,
+                        requestOptions: options,
+                        processor: processResults({ 
+                        format: format, 
+                        releaseDate: releaseDate,
+                        area: {
+                            areaType: 'msoa',
+                            areaName: null,
+                            areaCode: 'E09000014'
+                        }
+                    })
+        });
     }
 
     describe('#GetData', () => {
