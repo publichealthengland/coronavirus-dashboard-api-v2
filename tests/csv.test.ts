@@ -30,8 +30,6 @@ describe("csv", () => {
         
         const arr = csvToArray(csv).slice(1);
 
-        console.log(arr)
-
         data.forEach(element => {
             
             const dte = element.date;
