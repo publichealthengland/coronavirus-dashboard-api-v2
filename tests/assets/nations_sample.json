@@ -1,0 +1,166 @@
+[
+  {
+    "date": "2020-11-20",
+    "areaType": "nation",
+    "areaCode": "E92000001",
+    "areaName": "England",
+    "newCasesByPublishDate": 300,
+    "femaleCases": [
+      {
+        "age": "55_to_59",
+        "rate": 2517.1,
+        "value": 48502
+      },
+      {
+        "age":"35_to_39",
+        "rate":3374.3,
+        "value":64361
+      },
+      {
+        "age": "20_to_24",
+        "rate": 4088.8,
+        "value": 64919
+      }
+    ],
+    "maleCases": [
+      {
+        "age": "35_to_39",
+        "rate": 3374.3,
+        "value": 64361
+      },
+      {
+        "age":"35_to_39",
+        "rate":3374.3,
+        "value":64361
+      },
+      {
+        "age": "25_to_29",
+        "rate": 4329.4,
+        "value": 73389
+      }
+    ]
+  },
+  {
+    "date": "2020-11-19",
+    "areaType": "nation",
+    "areaCode": "E92000001",
+    "areaName": "England",
+    "newCasesByPublishDate": 300,
+    "femaleCases": [
+      {
+        "age": "55_to_59",
+        "rate": 2517.1,
+        "value": 48502
+      },
+      {
+        "age":"35_to_39",
+        "rate":3374.3,
+        "value":64361
+      },
+      {
+        "age": "20_to_24",
+        "rate": 4088.8,
+        "value": 64919
+      }
+    ],
+    "maleCases": [
+      {
+        "age": "55_to_59",
+        "rate": 2517.1,
+        "value": 48502
+      },
+      {
+        "age":"35_to_39",
+        "rate":3374.3,
+        "value":64361
+      },
+      {
+        "age": "20_to_24",
+        "rate": 4088.8,
+        "value": 64919
+      }
+    ]
+  },
+  {
+    "date": "2020-11-18",
+    "areaType": "nation",
+    "areaCode": "E92000001",
+    "areaName": "England",
+    "newCasesByPublishDate": 110,
+    "femaleCases": [
+      {
+        "age": "55_to_59",
+        "rate": 2517.1,
+        "value": 48502
+      },
+      {
+        "age":"35_to_39",
+        "rate":3374.3,
+        "value":64361
+      },
+      {
+        "age": "20_to_24",
+        "rate": 4088.8,
+        "value": 64919
+      }
+    ],
+    "maleCases": [
+      {
+        "age": "55_to_59",
+        "rate": 2517.1,
+        "value": 48502
+      },
+      {
+        "age":"35_to_39",
+        "rate":3374.3,
+        "value":64361
+      },
+      {
+        "age": "20_to_24",
+        "rate": 4088.8,
+        "value": 64919
+      }
+    ]
+  },
+  {
+    "date": "2020-11-17",
+    "areaType": "nation",
+    "areaCode": "E92000001",
+    "areaName": "England",
+    "newCasesByPublishDate": 92,
+    "femaleCases": [
+      {
+        "age": "55_to_59",
+        "rate": 2517.1,
+        "value": 48502
+      },
+      {
+        "age":"35_to_39",
+        "rate":3374.3,
+        "value":64361
+      },
+      {
+        "age": "20_to_24",
+        "rate": 4088.8,
+        "value": 64919
+      }
+    ],
+    "maleCases": [
+      {
+        "age": "55_to_59",
+        "rate": 2517.1,
+        "value": 48502
+      },
+      {
+        "age":"35_to_39",
+        "rate":3374.3,
+        "value":64361
+      },
+      {
+        "age": "20_to_24",
+        "rate": 4088.8,
+        "value": 64919
+      }
+    ]
+  }
+]

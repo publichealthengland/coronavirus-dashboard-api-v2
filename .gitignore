@@ -93,3 +93,7 @@ obj
 appsettings.json
 local.settings.json
 package-lock.json
+
+# Azure Functions local settings
+local.settings.json
+set-test-envs*
