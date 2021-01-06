@@ -106,9 +106,6 @@ describe("csv", () => {
         ];
 
         it('CSV integrity',  () => {
-
-            console.log("Hello................")
-            console.log(nations_sample)
     
             const csv =  toCSV(nations_sample, nestedMetrics);
 
