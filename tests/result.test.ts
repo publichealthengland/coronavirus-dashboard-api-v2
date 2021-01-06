@@ -2,7 +2,9 @@ import { describe, it } from "mocha";
 
 import assert from "assert";
 
-import type { GenericDBResponse, GenericJson, ResultProcessor } from "../data/types";
+import nations_sample from './assets/nations_sample.json';
+
+import type { GenericJson, ResultProcessor } from "../data/types";
 
 import { mainResultsStructure } from './vars';
 
@@ -20,69 +22,6 @@ describe("result", () => {
             "femaleCases"
         ];
 
-        const data = [
-            {
-                date: '2020-11-20',
-                areaType: 'nation',
-                areaCode: 'E92000001',
-                areaName: 'England',
-                newCasesByPublishDate: 300,
-                femaleCases:  [
-                    {"age":"55_to_59","rate":2517.1,"value":48502},
-                    {"age":"20_to_24","rate":4088.8,"value":64919}
-                ],
-                maleCases:  [
-                    {"age":"35_to_39","rate":3374.3,"value":64361},
-                    {"age":"25_to_29","rate":4329.4,"value":73389}
-                ]
-            },
-            {
-                date: '2020-11-19',
-                areaType: 'nation',
-                areaCode: 'E92000001',
-                areaName: 'England',
-                newCasesByPublishDate: 300,
-                femaleCases:  [
-                    {"age":"55_to_59","rate":2517.1,"value":48502},
-                    {"age":"20_to_24","rate":4088.8,"value":64919}
-                ],
-                maleCases:  [
-                    {"age":"55_to_59","rate":2517.1,"value":48502},
-                    {"age":"20_to_24","rate":4088.8,"value":64919}
-                ]
-            },
-            {
-                date: '2020-11-18',
-                areaType: 'nation',
-                areaCode: 'E92000001',
-                areaName: 'England',
-                newCasesByPublishDate: 110,
-                femaleCases:  [
-                    {"age":"55_to_59","rate":2517.1,"value":48502},
-                    {"age":"20_to_24","rate":4088.8,"value":64919}
-                ],
-                maleCases:  [
-                    {"age":"55_to_59","rate":2517.1,"value":48502},
-                    {"age":"20_to_24","rate":4088.8,"value":64919}
-                ]
-            },
-            {
-                date: '2020-11-17',
-                areaType: 'nation',
-                areaCode: 'E92000001',
-                areaName: 'England',
-                newCasesByPublishDate: 92,
-                femaleCases:  [
-                    {"age":"55_to_59","rate":2517.1,"value":48502},
-                    {"age":"20_to_24","rate":4088.8,"value":64919}
-                ],
-                maleCases:  [
-                    {"age":"55_to_59","rate":2517.1,"value":48502},
-                    {"age":"20_to_24","rate":4088.8,"value":64919}
-                ]
-            }
-        ];
-
         const params = {
             format: "json",
             nestedMetrics: nestedMetrics,
@@ -96,7 +35,7 @@ describe("result", () => {
 
         it('JSON integrity', async () => {
             
-            const jsonData = await processResults( params )(data as GenericDBResponse);
+            const jsonData = await processResults( params )(nations_sample);
   
             assert.notStrictEqual(jsonData, null);
             assert.strictEqual(typeof jsonData, "object");
@@ -109,7 +48,7 @@ describe("result", () => {
             assert.strictEqual("body" in  json, true);
             assert.strictEqual(json.length > 0, true);
 
-            const max_data_date = Math.max(...data.map(e => new Date(e.date).getTime()), 0);
+            const max_data_date = Math.max(...nations_sample.map(e => new Date(e.date).getTime()), 0);
             const max_response_date = Math.max(...json.body.map((e: GenericJson) => new Date(e.date).getTime()));
             assert.strictEqual (max_response_date <= max_data_date, true)
     
@@ -119,7 +58,7 @@ describe("result", () => {
 
             params["format"] = "csv";
 
-            const csvData = await processResults( params )(data as GenericDBResponse);
+            const csvData = await processResults( params )(nations_sample);
 
             assert.notStrictEqual(csvData, null);
             assert.strictEqual(typeof csvData, "object");
@@ -130,7 +69,7 @@ describe("result", () => {
 
            
             assert.strictEqual(
-                csvData.body !== null && csvData.body.split("\n").length > data.length + 1,
+                csvData.body !== null && csvData.body.split("\n").length > nations_sample.length + 1,
                 true
             );
 
@@ -144,7 +83,7 @@ describe("result", () => {
 
             const arr =  csvData.body !== null ? csvData.body.split("\n").slice(1) : [];
             const max_response_date = Math.max(...arr.map((e: string) => new Date(e.split(",")[0]).getTime()))
-            const max_data_date = Math.max(...data.map(e => new Date(e.date).getTime()), 0);
+            const max_data_date = Math.max(...nations_sample.map(e => new Date(e.date).getTime()), 0);
             assert.strictEqual (max_response_date <= max_data_date, true);
 
 
@@ -154,7 +93,7 @@ describe("result", () => {
 
             params["format"] = "jsonl";
 
-            const jsonlData = await processResults( params )(data as GenericDBResponse);
+            const jsonlData = await processResults( params )(nations_sample);
             assert.notStrictEqual(jsonlData, null);
             assert.strictEqual(typeof jsonlData, "object");
             assert.strictEqual("body" in jsonlData, true);
@@ -170,7 +109,7 @@ describe("result", () => {
 
             const arr = jsonlData.body !== null ? jsonlData.body.split("\n").slice(1) : [];
             const max_response_date = Math.max(...arr.map((e: string) => new Date((JSON.parse(e)).date).getTime()));
-            const max_data_date = Math.max(...data.map(e => new Date(e.date).getTime()), 0);
+            const max_data_date = Math.max(...nations_sample.map(e => new Date(e.date).getTime()), 0);
             assert.strictEqual (max_response_date <= max_data_date, true)
 
 

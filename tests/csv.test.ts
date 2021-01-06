@@ -2,7 +2,10 @@ import { describe, it } from "mocha";
 
 import assert from "assert";
 
-import type { GenericDBResponse, DBObject } from "../data/types";
+import nations_sample from './assets/nations_sample.json';
+import msoa_sample from './assets/msoa_sample.json';
+
+import type { DBObject } from "../data/types";
 
 import { mainResultsStructure, msoaResultsStructure } from './vars';
 
@@ -26,11 +29,11 @@ describe("csv", () => {
         return ret;
     };
 
-    const checkMsoaDuplicates = (csv: string, data: GenericDBResponse) => {
+    const checkMsoaDuplicates = (csv: string) => {
         
         const arr = csvToArray(csv).slice(1);
 
-        data.forEach(element => {
+        msoa_sample.forEach(element => {
             
             const dte = element.date;
 
@@ -50,17 +53,17 @@ describe("csv", () => {
             line = arr.filter(item => item[9] === dte && parseFloat(item[13]) === metric);
             assert.strictEqual(line.length, 1);
 
-            metric = element.newCasesBySpecimenDateDirection;
-            line = arr.filter(item => item[9] === dte && item[14] === metric);
+            const newCasesBySpecimenDateDirection = element.newCasesBySpecimenDateDirection;
+            line = arr.filter(item => item[9] === dte && item[14] === newCasesBySpecimenDateDirection);
             assert.strictEqual(line.length, 1);
         });
     };
 
-    const checkMainDuplicates = (csv: string, data: GenericDBResponse) => {
+    const checkMainDuplicates = (csv: string) => {
 
         const arr = csvToArray(csv).slice(1);
         
-        data.forEach(element => {
+        nations_sample.forEach(element => {
 
             const dte = element.date;
             const metric = element.newCasesByPublishDate;
@@ -97,92 +100,24 @@ describe("csv", () => {
 
     describe('#toCSV main', () => {
 
-        const data = [
-            {
-                date: '2020-11-20',
-                areaType: 'nation',
-                areaCode: 'E92000001',
-                areaName: 'England',
-                newCasesByPublishDate: 300,
-                femaleCases:  [
-                    {"age":"55_to_59","rate":2517.1,"value":48502},
-                    {"age":"35_to_39","rate":3374.3,"value":64361},
-                    {"age":"20_to_24","rate":4088.8,"value":64919}
-                ],
-                maleCases:  [
-                    {"age":"55_to_59","rate":2517.1,"value":48502},
-                    {"age":"35_to_39","rate":3374.3,"value":64361},
-                    {"age":"25_to_29","rate":4329.4,"value":73389}
-                ]
-            },
-            {
-                date: '2020-11-19',
-                areaType: 'nation',
-                areaCode: 'E92000001',
-                areaName: 'England',
-                newCasesByPublishDate: 300,
-                femaleCases:  [
-                    {"age":"55_to_59","rate":2517.1,"value":48502},
-                    {"age":"35_to_39","rate":3374.3,"value":64361},
-                    {"age":"20_to_24","rate":4088.8,"value":64919}
-                ],
-                maleCases:  [
-                    {"age":"55_to_59","rate":2517.1,"value":48502},
-                    {"age":"35_to_39","rate":3374.3,"value":64361},
-                    {"age":"20_to_24","rate":4088.8,"value":64919}
-                ]
-            },
-            {
-                date: '2020-11-18',
-                areaType: 'nation',
-                areaCode: 'E92000001',
-                areaName: 'England',
-                newCasesByPublishDate: 110,
-                femaleCases:  [
-                    {"age":"55_to_59","rate":2517.1,"value":48502},
-                    {"age":"35_to_39","rate":3374.3,"value":64361},
-                    {"age":"20_to_24","rate":4088.8,"value":64919}
-                ],
-                maleCases:  [
-                    {"age":"55_to_59","rate":2517.1,"value":48502},
-                    {"age":"35_to_39","rate":3374.3,"value":64361},
-                    {"age":"20_to_24","rate":4088.8,"value":64919}
-                ]
-            },
-            {
-                date: '2020-11-17',
-                areaType: 'nation',
-                areaCode: 'E92000001',
-                areaName: 'England',
-                newCasesByPublishDate: 92,
-                femaleCases:  [
-                    {"age":"55_to_59","rate":2517.1,"value":48502},
-                    {"age":"35_to_39","rate":3374.3,"value":64361},
-                    {"age":"20_to_24","rate":4088.8,"value":64919}
-                ],
-                maleCases:  [
-                    {"age":"55_to_59","rate":2517.1,"value":48502},
-                    {"age":"35_to_39","rate":3374.3,"value":64361},
-                    {"age":"20_to_24","rate":4088.8,"value":64919}
-                ]
-            }
-        ]
-
         const nestedMetrics: string[] = [
             "maleCases", 
             "femaleCases"
         ];
 
         it('CSV integrity',  () => {
+
+            console.log("Hello................")
+            console.log(nations_sample)
     
-            const csv =  toCSV(data as GenericDBResponse, nestedMetrics);
+            const csv =  toCSV(nations_sample, nestedMetrics);
 
             assert.notStrictEqual(csv, null);
 
             assert.strictEqual(typeof csv, "string");
            
             assert.strictEqual(
-                csv !== null && csv.split("\n").length > data.length + 1,
+                csv !== null && csv.split("\n").length > nations_sample.length + 1,
                 true
             );
 
@@ -196,10 +131,10 @@ describe("csv", () => {
 
             const arr = csv !== null ? csv.split("\n").slice(1) : [];
             const max_response_date = Math.max(...arr.map((e: string) => new Date(e.split(",")[0]).getTime()))
-            const max_data_date = Math.max(...data.map(e => new Date(e.date).getTime()), 0);
+            const max_data_date = Math.max(...nations_sample.map(e => new Date(e.date).getTime()), 0);
             assert.strictEqual (max_response_date <= max_data_date, true);
 
-            checkMainDuplicates(csv !== null ? csv : "", data);
+            checkMainDuplicates(csv !== null ? csv : "");
 
         });
 
@@ -207,94 +142,19 @@ describe("csv", () => {
 
     describe('#toCSV msoa', () => {
 
-        const data = [
-            {
-                regionCode: "E12000007",
-                regionName: "London",
-                UtlaCode: "E09000014",
-                UtlaName: "Haringey",
-                LtlaCode: "E09000014",
-                LtlaName: "Haringey",
-                areaType: "msoa",
-                areaCode: "E02000402",
-                areaName: "Tottenham Bruce Castle Park",
-                date: "2020-12-05",
-                newCasesBySpecimenDateRollingSum: 12,
-                newCasesBySpecimenDateRollingRate: 181.5,
-                newCasesBySpecimenDateChange: -1,
-                newCasesBySpecimenDateChangePercentage: -7.7,
-                newCasesBySpecimenDateDirection: "DOWN"
-                
-            },
-
-            {
-                regionCode: "E12000007",
-                regionName: "London",
-                UtlaCode: "E09000014",
-                UtlaName: "Haringey",
-                LtlaCode: "E09000014",
-                LtlaName: "Haringey",
-                areaType: "msoa",
-                areaCode: "E02000402",
-                areaName: "Tottenham Bruce Castle Park",
-                date: "2020-12-04",
-                newCasesBySpecimenDateRollingSum: 12,
-                newCasesBySpecimenDateRollingRate: 181.5,
-                newCasesBySpecimenDateChange: -1,
-                newCasesBySpecimenDateChangePercentage: -7.7,
-                newCasesBySpecimenDateDirection: "DOWN"
-            },     
-            {
-                regionCode: "E12000007",
-                regionName: "London",
-                UtlaCode: "E09000014",
-                UtlaName: "Haringey",
-                LtlaCode: "E09000014",
-                LtlaName: "Haringey",
-                areaType: "msoa",
-                areaCode: "E02000402",
-                areaName: "Tottenham Bruce Castle Park",
-                date: "2020-11-28",
-                newCasesBySpecimenDateRollingSum: 14,
-                newCasesBySpecimenDateRollingRate: 196.6,
-                newCasesBySpecimenDateChange: 2,
-                newCasesBySpecimenDateChangePercentage: 18.2,
-                newCasesBySpecimenDateDirection: "UP"
-                
-            },
-            {
-                regionCode: "E12000007",
-                regionName: "London",
-                UtlaCode: "E09000014",
-                UtlaName: "Haringey",
-                LtlaCode: "E09000014",
-                LtlaName: "Haringey",
-                areaType: "msoa",
-                areaCode: "E02000402",
-                areaName: "Tottenham Bruce Castle Park",
-                date: "2020-11-21",
-                newCasesBySpecimenDateRollingSum: 15,
-                newCasesBySpecimenDateRollingRate: 166.4,
-                newCasesBySpecimenDateChange: -4,
-                newCasesBySpecimenDateChangePercentage: -26.7,
-                newCasesBySpecimenDateDirection: "DOWN"
-                
-            }
-        ]
-
         const nestedMetrics: string[] = [
         ];
 
         it('CSV integrity',  () => {
     
-            const csv =  toCSV(data as GenericDBResponse, nestedMetrics)
+            const csv =  toCSV(msoa_sample, nestedMetrics)
 
             assert.notStrictEqual(csv, null);
 
             assert.strictEqual(typeof csv, "string");
            
             assert.strictEqual(
-                csv !== null && csv.split("\n").length === data.length + 1,
+                csv !== null && csv.split("\n").length === msoa_sample.length + 1,
                 true
             );
 
@@ -308,10 +168,10 @@ describe("csv", () => {
 
             const arr = csv !== null ? csv.split("\n").slice(1) : [];
             const max_response_date = Math.max(...arr.map((e: string) => new Date(e.split(",")[9]).getTime()))
-            const max_data_date = Math.max(...data.map(e => new Date(e.date).getTime()), 0);
+            const max_data_date = Math.max(...msoa_sample.map(e => new Date(e.date).getTime()), 0);
             assert.strictEqual (max_response_date <= max_data_date, true);
 
-            checkMsoaDuplicates(csv !== null ? csv : "", data);
+            checkMsoaDuplicates(csv !== null ? csv : "");
 
         });
 
