@@ -1,4 +1,4 @@
-# Coronavirus Dashboard API v.2
+# Coronavirus Dashboard API v.2 [DEPRECATED]
 
 
 ![Build test for pull and push requests](https://github.com/PublicHealthEngland/coronavirus-dashboard-api-v2/workflows/Build/badge.svg)
